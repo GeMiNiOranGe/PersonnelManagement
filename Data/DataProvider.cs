@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 
@@ -23,7 +24,8 @@ namespace Data {
             return connection;
         }
         public SqlCommand CreateCommand(string query) {
-            var connection = CreateConnection();
+            // TODO: using(var connection = CreateConnection()) { return connection; }
+            SqlConnection connection = CreateConnection();
             var command = new SqlCommand(query, connection);
             return command;
         }
@@ -54,8 +56,9 @@ namespace Data {
 
         public DataTable ExecuteQuery(string query) {
             var dataTable = new DataTable();
-            using (var connection = CreateConnection()) {
+            using (SqlConnection connection = CreateConnection()) {
                 OpenConnection(connection);
+                //TODO: use execute create command method
                 var command = new SqlCommand(query, connection);
                 var dataAdapter = new SqlDataAdapter(command);
 
@@ -91,7 +94,7 @@ namespace Data {
         }*/
         public int ExecuteNonQuery(string query, object[] parameters = null) {
             int numberOfRowsAffected = 0;
-            using (var command = CreateCommand(query)) {
+            using (SqlCommand command = CreateCommand(query)) {
                 OpenConnection(command.Connection);
                 if (parameters != null) {
                     string[] listParam = query.Split(' ');
@@ -120,17 +123,38 @@ namespace Data {
         /// </returns>
         public object ExecuteScalar(string query) {
             object objData = 0;
-            using (var sqlConnection = CreateConnection()) {
-                OpenConnection(sqlConnection);
-                var sqlCommand = new SqlCommand(query, sqlConnection);
+            using (SqlConnection connection = CreateConnection()) {
+                OpenConnection(connection);
+                var sqlCommand = new SqlCommand(query, connection);
 
                 // Get data 
-                try { objData = sqlCommand.ExecuteScalar(); }
-                catch (SqlException ex) { throw ex; }
+                try {
+                    objData = sqlCommand.ExecuteScalar();
+                }
+                catch (SqlException ex) {
+                    throw ex;
+                }
 
-                CloseConnection(sqlConnection);
+                CloseConnection(connection);
             }
             return objData;
+        }
+
+        public void ExecuteReader(string strQuery, out SqlDataReader dataReader) {
+            throw new NotImplementedException();
+            /*
+            using (var sqlConnection = CreateConnection()) {
+                OpenConnection(sqlConnection);
+                var sqlCommand = new SqlCommand(strQuery, sqlConnection);
+                try {
+                    dataReader = sqlCommand.ExecuteReader();
+                }
+                catch (SqlException ex) {
+                    throw ex;
+                }
+                CloseConnection(sqlConnection);
+            }
+            */
         }
     }
 }
