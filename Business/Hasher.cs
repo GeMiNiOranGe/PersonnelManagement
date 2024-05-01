@@ -1,26 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Business {
     static class Hasher {
-        public static byte[] CreateHash(string message, HashAlgorithmType type) {
+        public static byte[] ComputeHash(string message, HashAlgorithmType type) {
             if (string.IsNullOrEmpty(message)) {
                 throw new ArgumentNullException("message");
             }
 
-            using (HashAlgorithm algorithm = GetHashAlgorithm(type)) {
+            using (HashAlgorithm algorithm = CreateHashAlgorithm(type)) {
                 var inputBytes = Encoding.UTF8.GetBytes(message);
                 var hashBytes = algorithm.ComputeHash(inputBytes);
                 return hashBytes;
             }
         }
 
-        private static HashAlgorithm GetHashAlgorithm(HashAlgorithmType type) {
+        #region Factory method Design Pattern
+        private static HashAlgorithm CreateHashAlgorithm(HashAlgorithmType type) {
             switch (type) {
             case HashAlgorithmType.Md5:
                 return MD5.Create();
@@ -36,5 +34,6 @@ namespace Business {
                 throw new ArgumentException("Invalid hash algorithm type.");
             }
         }
+        #endregion
     }
 }
