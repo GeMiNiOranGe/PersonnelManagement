@@ -26,10 +26,12 @@ namespace Business {
         #endregion
 
         byte[] ObjectToByteArray(object obj) {
-            if (obj == null)
+            if (obj == null) {
                 return null;
-            BinaryFormatter bf = new BinaryFormatter();
-            using (MemoryStream ms = new MemoryStream()) {
+            }
+
+            var bf = new BinaryFormatter();
+            using (var ms = new MemoryStream()) {
                 bf.Serialize(ms, obj);
                 return ms.ToArray();
             }

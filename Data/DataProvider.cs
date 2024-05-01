@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
@@ -25,7 +24,6 @@ namespace Data {
             return connection;
         }
         public SqlCommand CreateCommand(string query) {
-            // TODO: using(var connection = CreateConnection()) { return connection; }
             SqlConnection connection = CreateConnection();
             var command = new SqlCommand(query, connection);
             return command;
@@ -57,21 +55,15 @@ namespace Data {
 
         public DataTable ExecuteQuery(string query) {
             var dataTable = new DataTable();
-            using (SqlConnection connection = CreateConnection()) {
-                OpenConnection(connection);
-                //TODO: use execute create command method
-                var command = new SqlCommand(query, connection);
-                var dataAdapter = new SqlDataAdapter(command);
-
-                // Fill dataTable with returned query
-                try {
-                    dataAdapter.Fill(dataTable);
+            using (SqlCommand command = CreateCommand(query)) {
+                using (var dataAdapter = new SqlDataAdapter(command)) {
+                    try {
+                        dataAdapter.Fill(dataTable);
+                    }
+                    catch (SqlException ex) {
+                        throw ex;
+                    }
                 }
-                catch (SqlException ex) {
-                    throw ex;
-                }
-
-                CloseConnection(connection);
             }
             return dataTable;
         }
@@ -96,7 +88,6 @@ namespace Data {
         public int ExecuteNonQuery(string query, object[] parameters = null) {
             int numberOfRowsAffected = 0;
             using (SqlCommand command = CreateCommand(query)) {
-                OpenConnection(command.Connection);
                 if (parameters != null) {
                     string[] listParam = query.Split(' ');
                     int i = 0;
@@ -107,6 +98,8 @@ namespace Data {
                         }
                     }
                 }
+
+                OpenConnection(command.Connection);
                 numberOfRowsAffected = command.ExecuteNonQuery();
                 CloseConnection(command.Connection);
             }
@@ -158,26 +151,21 @@ namespace Data {
             */
         }
 
-        public DataTable ExecuteProcedure(string procedureName, (string, SqlDbType, int, object)[] parameterTuples) {
+        public DataTable ExecuteProcedure(string procedureName, (string name, SqlDbType type, int size, object value)[] parameters) {
             var dataTable = new DataTable();
             using (SqlCommand command = CreateCommand(procedureName)) {
                 command.CommandType = CommandType.StoredProcedure;
 
-                foreach (var element in parameterTuples) {
+                foreach (var (name, type, size, value) in parameters) {
                     var parameter = new SqlParameter() {
-                        ParameterName = element.Item1,
-                        SqlDbType = element.Item2,
-                        Size = element.Item3,
-                        Value = element.Item4
+                        ParameterName = name,
+                        SqlDbType = type,
+                        Size = size,
+                        Value = value
                     };
                     command.Parameters.Add(parameter);
                 }
 
-                //command.ExecuteNonQuery();
-
-                //var dataAdapter = new SqlDataAdapter(command);
-
-                OpenConnection(command.Connection);
                 using (var dataAdapter = new SqlDataAdapter(command)) {
                     try {
                         dataAdapter.Fill(dataTable);
@@ -186,7 +174,6 @@ namespace Data {
                         throw ex;
                     }
                 }
-                CloseConnection(command.Connection);
             }
             return dataTable;
         }

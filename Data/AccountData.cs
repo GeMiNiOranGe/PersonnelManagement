@@ -26,7 +26,7 @@ namespace Data {
                 "usp_GetAccountDetails",
                 new (string, SqlDbType, int, object)[] {
                     ("@Username", SqlDbType.VarChar, 50, (object)username),
-                    ("@Password", SqlDbType.VarBinary, -1, (object)password)
+                    ("@Password", SqlDbType.VarBinary, DatabaseConstants.MAX_SIZE, (object)password)
                 }
             );
             return dataTable;
