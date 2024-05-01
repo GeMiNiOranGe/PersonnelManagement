@@ -3,7 +3,7 @@ using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Business {
+namespace Business.Security {
     static class Hasher {
         public static byte[] ComputeHash(string message, HashAlgorithmType type) {
             if (string.IsNullOrEmpty(message)) {

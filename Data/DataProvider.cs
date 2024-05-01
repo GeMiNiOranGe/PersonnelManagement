@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 
 namespace Data {
     internal class DataProvider {
-        private readonly string CONNECTION_STRING = @"Data Source=.;Initial Catalog=PersonnelManagement;Integrated Security=True";
+        private const string CONNECTION_STRING = @"Data Source=.;Initial Catalog=PersonnelManagement;Integrated Security=True";
 
         #region Singleton Design Pattern
         private static DataProvider instance;
@@ -155,6 +156,39 @@ namespace Data {
                 CloseConnection(sqlConnection);
             }
             */
+        }
+
+        public DataTable ExecuteProcedure(string procedureName, (string, SqlDbType, int, object)[] parameterTuples) {
+            var dataTable = new DataTable();
+            using (SqlCommand command = CreateCommand(procedureName)) {
+                command.CommandType = CommandType.StoredProcedure;
+
+                foreach (var element in parameterTuples) {
+                    var parameter = new SqlParameter() {
+                        ParameterName = element.Item1,
+                        SqlDbType = element.Item2,
+                        Size = element.Item3,
+                        Value = element.Item4
+                    };
+                    command.Parameters.Add(parameter);
+                }
+
+                //command.ExecuteNonQuery();
+
+                //var dataAdapter = new SqlDataAdapter(command);
+
+                OpenConnection(command.Connection);
+                using (var dataAdapter = new SqlDataAdapter(command)) {
+                    try {
+                        dataAdapter.Fill(dataTable);
+                    }
+                    catch (SqlException ex) {
+                        throw ex;
+                    }
+                }
+                CloseConnection(command.Connection);
+            }
+            return dataTable;
         }
     }
 }
