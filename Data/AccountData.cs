@@ -21,15 +21,28 @@ namespace Data {
         private AccountData() { }
         #endregion
 
-        public DataTable GetAccountDetails(string username, byte[] password) {
-            DataTable dataTable = DataProvider.Instance.ExecuteProcedure(
-                "usp_GetAccountDetails",
-                new (string, SqlDbType, int, object)[] {
-                    ("@Username", SqlDbType.VarChar, 50, (object)username),
-                    ("@Password", SqlDbType.VarBinary, DatabaseConstants.MAX_SIZE, (object)password)
-                }
-            );
-            return dataTable;
+        public Account GetAccountDetails(string accountName) {
+            var procedureName = "usp_GetAccountDetails";
+            var parameters = new (string, SqlDbType, int, object)[] {
+                ("@AccountName", SqlDbType.VarChar, 50, accountName)
+            };
+
+            DataTable dataTable = DataProvider.Instance.ExecuteProcedure(procedureName, parameters);
+
+            Account account = null;
+            if (dataTable.Rows.Count > 0) {
+                DataRow row = dataTable.Rows[0];
+
+                account = new Account() {
+                    AccountId = Convert.ToInt32(row["AccountId"]),
+                    Username = row["Username"].ToString(),
+                    Password = row["Password"] as byte[],
+                    Salt = row["Salt"] as byte[],
+                    EmployeeId = row["EmployeeId"].ToString()
+                };
+            }
+
+            return account;
         }
     }
 }

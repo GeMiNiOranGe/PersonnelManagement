@@ -15,14 +15,35 @@ namespace Presentation {
     public partial class FormLogin : Form {
         public FormLogin() {
             InitializeComponent();
+        }
 
-            Account account = AccountBusiness.Instance.GetAccountDetails("tranvantoan", "toan@123");
-            
-            txtAccountId.Text = account.AccountId.ToString();
-            txtUsername.Text = account.Username;
-            txtPassword.Text = BitConverter.ToString(account.Password);
-            txtSalt.Text = BitConverter.ToString(account.Salt);
-            txtEmployeeId.Text = account.EmployeeId.ToString();
+        private void BtnSignIn_Click(object sender, EventArgs e) {
+            LoginStatus loginStatus = LoginStatus.None;
+            try {
+                loginStatus = AccountBusiness.Instance.GetLoginStatus(txtAccountName.Text, txtPassword.Text);
+            }
+            catch (Exception ex) {
+                MessageBox.Show(ex.Message);
+            }
+
+            switch (loginStatus) {
+            case LoginStatus.Success:
+                var formDashboard = new FormDashboard() {
+                    RootForm = this
+                };
+                formDashboard.Show();
+                Hide();
+                break;
+            case LoginStatus.InvalidInput:
+                lblError.Text = "Tên tài khoản và mật khẩu không được để trống!";
+                break;
+            case LoginStatus.InvalidAccount:
+                lblError.Text = "Tên tài khoản hoặc mật khẩu sai!";
+                break;
+            case LoginStatus.OtherError:
+                lblError.Text = "Đã xảy ra lỗi trong quá trình đăng nhập!";
+                break;
+            }
         }
     }
 }

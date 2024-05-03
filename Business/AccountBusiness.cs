@@ -8,6 +8,8 @@ using System.Security.Authentication;
 using System.Text;
 using System.Threading.Tasks;
 
+using Business.Utilities;
+using Business.Security;
 using Data;
 using DTO;
 
@@ -25,34 +27,29 @@ namespace Business {
         private AccountBusiness() { }
         #endregion
 
-        byte[] ObjectToByteArray(object obj) {
-            if (obj == null) {
-                return null;
+        public LoginStatus GetLoginStatus(string accountName, string password) {
+            Account account = AccountData.Instance.GetAccountDetails(accountName);
+
+            byte[] hashedPassword = null;
+
+            if (account != null) {
+                string castedSalt = DefaultConverter.GetString(account.Salt);
+                string saltedPassword = password + castedSalt;
+                hashedPassword = Hasher.ComputeHash(saltedPassword, HashAlgorithmType.Sha256);
             }
 
-            var bf = new BinaryFormatter();
-            using (var ms = new MemoryStream()) {
-                bf.Serialize(ms, obj);
-                return ms.ToArray();
+            bool isValid = account != null && account.Password.SequenceEqual(hashedPassword);
+
+            if (string.IsNullOrEmpty(accountName) || string.IsNullOrEmpty(password)) {
+                return LoginStatus.InvalidInput;
             }
-        }
-
-        public Account GetAccountDetails(string username, string password) {
-            byte[] hashedPassword = Security.Hasher.ComputeHash(password, HashAlgorithmType.Sha1);
-
-            DataTable dataTable = AccountData.Instance.GetAccountDetails(username, hashedPassword);
-
-            DataRow row = dataTable.Rows[0];
-
-            Account account = new Account() {
-                AccountId = Convert.ToInt32(row["AccountId"]),
-                Username = row["Username"].ToString(),
-                Password = ObjectToByteArray(row["Password"]),
-                Salt = ObjectToByteArray(row["Salt"]),
-                EmployeeId = row["EmployeeId"].ToString()
-            };
-
-            return account;
+            if (isValid) {
+                return LoginStatus.Success;
+            }
+            if (!isValid) {
+                return LoginStatus.InvalidAccount;
+            }
+            return LoginStatus.OtherError;
         }
     }
 }

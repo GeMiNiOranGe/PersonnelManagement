@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Security.Authentication;
 using System.Security.Cryptography;
-using System.Text;
+
+using Business.Utilities;
 
 namespace Business.Security {
     static class Hasher {
@@ -11,8 +12,8 @@ namespace Business.Security {
             }
 
             using (HashAlgorithm algorithm = CreateHashAlgorithm(type)) {
-                var inputBytes = Encoding.UTF8.GetBytes(message);
-                var hashBytes = algorithm.ComputeHash(inputBytes);
+                byte[] inputBytes = DefaultConverter.GetBytes(message);
+                byte[] hashBytes = algorithm.ComputeHash(inputBytes);
                 return hashBytes;
             }
         }
