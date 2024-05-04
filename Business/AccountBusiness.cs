@@ -30,15 +30,15 @@ namespace Business {
         public LoginStatus GetLoginStatus(string accountName, string password) {
             Account account = AccountData.Instance.GetAccountDetails(accountName);
 
-            byte[] hashedPassword = null;
+            var isSamePassword = false;
 
             if (account != null) {
-                string castedSalt = DefaultConverter.GetString(account.Salt);
-                string saltedPassword = password + castedSalt;
-                hashedPassword = Hasher.ComputeHash(saltedPassword, HashAlgorithmType.Sha256);
+                string castSalt = DefaultConverter.GetString(account.Salt);
+                string saltedPassword = string.Concat(password, castSalt);
+                isSamePassword = Hasher.VerifyMessage(saltedPassword, account.Password, HashAlgorithmType.Sha256);
             }
 
-            bool isValid = account != null && account.Password.SequenceEqual(hashedPassword);
+            bool isValid = account != null && isSamePassword;
 
             if (string.IsNullOrEmpty(accountName) || string.IsNullOrEmpty(password)) {
                 return LoginStatus.InvalidInput;
