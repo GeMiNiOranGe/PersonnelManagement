@@ -9,7 +9,7 @@
 @REM for %%i in (*.sql) do (
 @REM     sqlcmd /S . /d master -E -i"%%i"
 @REM )
-pause
+
 sqlcmd /S . /d master -E -i"InitialDatabase.sql"
 sqlcmd /S . /d master -E -i"CreateStoredProcedure.sql"
 sqlcmd /S . /d master -E -i"PopulateData.sql"

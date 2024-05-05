@@ -27,7 +27,7 @@ namespace Data {
             var procedureName = "usp_GetAccountDetails";
             var parameters = new SqlParameter[] {
                 new SqlParameter() {
-                    ParameterName = "@AccountName",
+                    ParameterName = "AccountName",
                     SqlDbType = SqlDbType.VarChar,
                     Size = 50,
                     Value = accountName
