@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,14 +23,18 @@ namespace Data {
         #endregion
 
         public Account GetAccountDetails(string accountName) {
+            Account account = null;
             var procedureName = "usp_GetAccountDetails";
-            var parameters = new (string, SqlDbType, int, object)[] {
-                ("@AccountName", SqlDbType.VarChar, 50, accountName)
+            var parameters = new SqlParameter[] {
+                new SqlParameter() {
+                    ParameterName = "@AccountName",
+                    SqlDbType = SqlDbType.VarChar,
+                    Size = 50,
+                    Value = accountName
+                }
             };
 
             DataTable dataTable = DataProvider.Instance.ExecuteProcedure(procedureName, parameters);
-
-            Account account = null;
             if (dataTable.Rows.Count > 0) {
                 DataRow row = dataTable.Rows[0];
 

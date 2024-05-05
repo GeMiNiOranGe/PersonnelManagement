@@ -151,19 +151,13 @@ namespace Data {
             */
         }
 
-        public DataTable ExecuteProcedure(string procedureName, (string name, SqlDbType type, int size, object value)[] parameters) {
+        public DataTable ExecuteProcedure(string query, SqlParameter[] parameters = null) {
             var dataTable = new DataTable();
-            using (SqlCommand command = CreateCommand(procedureName)) {
+            using (SqlCommand command = CreateCommand(query)) {
                 command.CommandType = CommandType.StoredProcedure;
 
-                foreach (var (name, type, size, value) in parameters) {
-                    var parameter = new SqlParameter() {
-                        ParameterName = name,
-                        SqlDbType = type,
-                        Size = size,
-                        Value = value
-                    };
-                    command.Parameters.Add(parameter);
+                if (parameters != null) {
+                    command.Parameters.AddRange(parameters);
                 }
 
                 using (var dataAdapter = new SqlDataAdapter(command)) {
