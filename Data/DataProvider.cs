@@ -5,8 +5,6 @@ using System.Linq;
 
 namespace Data {
     internal class DataProvider {
-        private const string CONNECTION_STRING = @"Data Source=.;Initial Catalog=PersonnelManagement;Integrated Security=True";
-
         #region Singleton Design Pattern
         private static DataProvider instance;
 
@@ -20,7 +18,7 @@ namespace Data {
         #endregion
 
         public SqlConnection CreateConnection() {
-            var connection = new SqlConnection(CONNECTION_STRING);
+            var connection = new SqlConnection(DTO.Config.CONNECTION_STRING);
             return connection;
         }
         public SqlCommand CreateCommand(string query) {
