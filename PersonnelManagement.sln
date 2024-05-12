@@ -13,8 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DTO", "DTO\DTO.csproj", "{5
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D857E9C3-BB7C-4DD1-B012-B88A9D2E7E10}"
 	ProjectSection(SolutionItems) = preProject
+		Database\PersonnelManagement.sql = Database\PersonnelManagement.sql
 		README.md = README.md
-		Database\SQLQuery1.sql = Database\SQLQuery1.sql
 	EndProjectSection
 EndProject
 Global
