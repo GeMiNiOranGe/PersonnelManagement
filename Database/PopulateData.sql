@@ -23,14 +23,15 @@ CREATE OR ALTER PROCEDURE [dbo].[usp_CreateDefaultAccount]
 AS BEGIN
     SET NOCOUNT ON
 
-    DECLARE @DefaultPassword    VARCHAR(50) = 'P@55w0rd'
+    DECLARE @DefaultPassword    VARCHAR(50)
     DECLARE @Salt               VARBINARY(Max)
     DECLARE @HashedPassword     VARBINARY(Max)
     DECLARE @SaltedPassword     VARCHAR(Max)
 
-    SET @Salt = crypt_gen_random(32)
-    SET @SaltedPassword = @DefaultPassword + Cast(@Salt AS VARCHAR(Max))
-    SET @HashedPassword = Cast(HashBytes('SHA2_256', @SaltedPassword) AS VARBINARY(Max))
+    SET @DefaultPassword = @EmployeeId
+    SET @Salt            = crypt_gen_random(32)
+    SET @SaltedPassword  = @DefaultPassword + Cast(@Salt AS VARCHAR(Max))
+    SET @HashedPassword  = Cast(HashBytes('SHA2_256', @SaltedPassword) AS VARBINARY(Max))
 
     INSERT INTO [dbo].[Account]
             ([Username],    [Password],         [Salt], [EmployeeId])
@@ -304,6 +305,7 @@ EXECUTE [dbo].[usp_CreateDefaultAccount] @Username = 'phanngongoclam',  @Employe
 EXECUTE [dbo].[usp_CreateDefaultAccount] @Username = 'huynhvu',         @EmployeeId = 'EMP00009'
 EXECUTE [dbo].[usp_CreateDefaultAccount] @Username = 'tohuynhnga',      @EmployeeId = 'EMP00010'
 EXECUTE [dbo].[usp_CreateDefaultAccount] @Username = 'phamtuanphong',   @EmployeeId = 'EMP00011'
+GO
 
 -- drop unnecessary procedures --------------------------------------------------------------------
 DROP PROCEDURE [dbo].[usp_CreateDefaultAccount]
