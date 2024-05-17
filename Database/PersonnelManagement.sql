@@ -528,7 +528,7 @@ BEGIN
 
         SET @SQL = '
         CREATE VIEW vEmployeePersonnel AS
-		SELECT EmployeeID, FullName, Gender, DateOfBirth, PhoneNumber, TaxCode, DepartmentID
+		SELECT EmployeeID, FullName, Gender, DateOfBirth, PhoneNumber, Salary, TaxCode, DepartmentID
 		FROM Employees
 		WHERE DepartmentID NOT IN (SELECT DepartmentID 
 								   FROM Employees AS E JOIN Accounts AS A ON E.EmployeeID = A.EmployeeID 
@@ -626,6 +626,138 @@ BEGIN
 END
 GO
 
+-- EXEC spSelectEmployees 5
+CREATE OR ALTER PROC spInsertEmployees
+    @RoleID INT,
+	@ValueList NVARCHAR(MAX)
+AS
+BEGIN
+    -- Kiểm tra quyền của RoleID
+    IF NOT EXISTS (SELECT 1 FROM RolePermissions WHERE PermissionID = 2 AND RoleID = @RoleID)
+    BEGIN
+        PRINT 'OUT'
+        RETURN
+    END
+
+    -- Lấy tên các cột từ view
+	--DECLARE @ValueList NVARCHAR(MAX) = N'Nguyễn Cát Tường,1,20031119,0234671652,70000000,123456789,null'
+    DECLARE @columnList NVARCHAR(MAX)
+    SELECT @columnList = COALESCE(@columnList + ', ', '') + COLUMN_NAME
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_NAME = 'vEmployeePersonnel'
+
+    -- Tạo câu lệnh INSERT
+    DECLARE @insertQuery NVARCHAR(MAX)
+    SET @insertQuery = 'INSERT INTO Employees (' + @columnList + ') VALUES '
+
+    -- Phân tách chuỗi dữ liệu và ghép vào câu lệnh INSERT
+    SET @insertQuery = @insertQuery + '('
+	--print @insertQuery
+-- Lặp qua từng giá trị trong chuỗi dữ liệu
+DECLARE @startIndex INT = 1
+DECLARE @endIndex INT = CHARINDEX(',', @ValueList, @startIndex)
+WHILE @endIndex > 0
+BEGIN
+    DECLARE @value NVARCHAR(MAX) = SUBSTRING(@ValueList, @startIndex, @endIndex - @startIndex)
+
+    -- Mã hóa giá trị của cột salary và allowance
+    IF @columnList LIKE '%salary%'
+    BEGIN
+        IF CHARINDEX('salary', @columnList) > 0
+        BEGIN
+            SET @value = CONVERT(NVARCHAR(MAX), EncryptByKey(Key_GUID('EmployeeSymKey'), @value))
+        END
+    END
+
+    IF @columnList LIKE '%allowance%'
+    BEGIN
+        IF CHARINDEX('allowance', @columnList) > 0
+        BEGIN
+            SET @value = CONVERT(NVARCHAR(MAX), EncryptByKey(Key_GUID('EmployeeSymKey'), @value))
+        END
+    END
+
+    -- Thêm giá trị vào chuỗi truy vấn
+    SET @insertQuery = @insertQuery + '''' + @value + ''', '
+
+    SET @startIndex = @endIndex + 1
+    SET @endIndex = CHARINDEX(',', @ValueList, @startIndex)
+END
+
+-- Loại bỏ dấu phẩy cuối cùng
+SET @insertQuery = LEFT(@insertQuery, LEN(@insertQuery) - 1)
+
+-- In ra câu truy vấn
+PRINT @insertQuery
+
+-- Thực thi câu lệnh INSERT
+EXEC sp_executesql @insertQuery
+
+
+
+
+    -- Thực thi câu lệnh INSERT
+    EXEC sp_executesql @insertQuery
+
+
+
+
+	DECLARE @ValueList NVARCHAR(MAX) = N'Nguyễn Cát Tường,1,20031119,0234671652,70000000,123456789,null'
+DECLARE @columnList NVARCHAR(MAX)
+
+-- Lấy tên các cột từ view
+SELECT @columnList = COALESCE(@columnList + ', ', '') + COLUMN_NAME
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME = 'vEmployeePersonnel'
+
+-- Tạo câu lệnh INSERT
+DECLARE @insertQuery NVARCHAR(MAX)
+SET @insertQuery = 'INSERT INTO Employees (' + @columnList + ') VALUES (dbo.setEmployeeID(), '
+
+-- Thay thế chuỗi "null" bằng NULL
+--SET @ValueList = REPLACE(@ValueList, ',null,', ',NULL,')
+--SET @ValueList = REPLACE(@ValueList, ',null', ',NULL')
+
+-- Tách các giá trị từ chuỗi @ValueList
+DECLARE @ValuesTable TABLE ([Value] NVARCHAR(MAX))
+DECLARE @Pos INT
+DECLARE @End INT
+SET @Pos = 1
+WHILE CHARINDEX(',', @ValueList, @Pos) > 0
+BEGIN
+    SET @End = CHARINDEX(',', @ValueList, @Pos)
+    INSERT INTO @ValuesTable ([Value]) VALUES (SUBSTRING(@ValueList, @Pos, @End - @Pos))
+    SET @Pos = @End + 1
+END
+INSERT INTO @ValuesTable ([Value]) VALUES (SUBSTRING(@ValueList, @Pos, LEN(@ValueList) - @Pos + 1))
+
+-- Lấy giá trị từ bảng tạm và thêm vào câu lệnh INSERT
+DECLARE @EncryptedValue NVARCHAR(MAX)
+SELECT @insertQuery = @insertQuery + 
+    CASE 
+		WHEN Value = 'null' THEN 'null'
+		WHEN Value = 'NULL' THEN 'null'
+        WHEN @columnList LIKE 'Salary' AND Value = 'NULL' THEN 'NULL'
+        WHEN @columnList LIKE 'Salary' THEN CONVERT(varbinary(max), EncryptByKey(Key_GUID('EmployeeSymKey'), CONVERT(varbinary(max), CAST([Value] AS varchar(MAX)))))
+        --WHEN @columnList LIKE 'Allowance' AND Value = 'NULL' THEN 'NULL'
+        --WHEN @columnList LIKE 'Allowance' THEN CONVERT(varbinary(max), EncryptByKey(Key_GUID('EmployeeSymKey'), CONVERT(varbinary(max), CAST([Value] AS varchar(MAX)))))
+        ELSE 'N''' + Value + ''''
+    END + ','
+FROM @ValuesTable
+
+-- Loại bỏ dấu phẩy cuối cùng
+SET @insertQuery = LEFT(@insertQuery, LEN(@insertQuery) - 1)
+SET @insertQuery = @insertQuery + ')'
+-- In ra câu truy vấn INSERT hoàn chỉnh
+PRINT @insertQuery
+EXEC sp_executesql @insertQuery
+END
+GO
+
+
+EXEC spInsertEmployees 5, N'Nguyễn Cát Tường,1,20031119,0234671652,70000000,123456789,null'
+--EmployeeID, FullName, Gender, DateOfBirth, PhoneNumber, TaxCode, DepartmentID
+select * from employees
 -- Update bang Employees
 CREATE OR ALTER PROC spUpdateEmployees
 	@RoleName VARCHAR(50),
