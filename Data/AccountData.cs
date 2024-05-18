@@ -10,7 +10,7 @@ namespace Data
 {
     public class AccountData
     {
-        private string connectionString = "Data Source=ADMIN;Initial Catalog=PersonnelManagement;Integrated Security=True";
+        private string connectionString = Config.connectionString;
 
         public DataTable ExecuteStoredProcedure(string storedProcedureName, SqlParameter[] parameters)
         {

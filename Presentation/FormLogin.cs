@@ -14,6 +14,7 @@ namespace Presentation
     public partial class FormLogin : Form
     {
         private AccountBusiness accountBusiness;
+        public int roleID {  get; private set; }
         public FormLogin()
         {
             InitializeComponent();
@@ -25,18 +26,33 @@ namespace Presentation
             string username = txtUsername.Text;
             string password = txtPassword.Text;
             int result;
-            string roleName;
+            int roleID;
+            string name;
 
-            accountBusiness.Login(username, password, out result, out roleName);
+            accountBusiness.Login(username, password, out result, out roleID, out name);
 
             if (result == 1)
             {
-                MessageBox.Show($"Đăng nhập thành công! Role của bạn là: {roleName}", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show($"Đăng nhập thành công! RoleID:{roleID}", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                this.roleID= roleID;
+                FormMenu fmn=new FormMenu(roleID);
+                fmn.Show();
+               
             }
             else
             {
-                MessageBox.Show("Đăng nhập không thành công! Vui lòng kiểm tra lại tên đăng nhập và mật khẩu.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Đăng nhập không thành công!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void FormLogin_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnExit_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
         }
     }
 }

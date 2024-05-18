@@ -459,13 +459,23 @@ CREATE OR ALTER PROC spSelectEmployees
     @RoleID INT
 AS
 BEGIN
-	IF NOT EXISTS (SELECT * FROM RolePermissions WHERE PermissionID IN (1) AND RoleID = @RoleID)
-	BEGIN
-		RETURN
-	END
+    BEGIN TRY
+        OPEN SYMMETRIC KEY EmployeeSymKey
+        DECRYPTION BY PASSWORD='123456'
+    END TRY
+    BEGIN CATCH
+        PRINT N'Error opening symmetric key: ' + ERROR_MESSAGE()
+        RETURN
+    END CATCH
+
+    IF NOT EXISTS (SELECT * FROM RolePermissions WHERE PermissionID = 1 AND RoleID = @RoleID)
+    BEGIN
+        RETURN
+    END
+
     DECLARE @ViewName VARCHAR(50)
     DECLARE @AccountID INT
-	DECLARE @SQL NVARCHAR(MAX)
+    DECLARE @SQL NVARCHAR(MAX)
 
     SELECT @ViewName = Name
     FROM RolePermissions
@@ -475,158 +485,177 @@ BEGIN
     FROM AccountRoles
     WHERE RoleID = @RoleID
 
-	-- View cho Nhan Vien 
+    -- View for Employees
     IF @ViewName = 'vEmployees'
     BEGIN
         IF EXISTS (SELECT 1 FROM sys.views WHERE Name = 'vEmployees')
-		BEGIN
-			EXEC('DROP VIEW vEmployees')
-		END
+        BEGIN
+            EXEC('DROP VIEW vEmployees')
+        END
 
         SET @SQL = '
         CREATE VIEW vEmployees AS
         SELECT EmployeeID, FullName, Gender, DateOfBirth, PhoneNumber, TaxCode, DepartmentID
         FROM Employees 
         WHERE DepartmentID IN (SELECT DepartmentID 
-							   FROM Employees AS E
-							   JOIN Accounts AS A ON E.EmployeeID = A.EmployeeID
-							   WHERE A.AccountID = ' + CAST(@AccountID AS NVARCHAR) + ')'
+                               FROM Employees AS E
+                               JOIN Accounts AS A ON E.EmployeeID = A.EmployeeID
+                               WHERE A.AccountID = ' + CAST(@AccountID AS NVARCHAR) + ')'
 
         EXEC sp_executesql @SQL
 
         SELECT * FROM vEmployees
     END
 
-	-- View cho Truong Phong (tru phong Nhan Su)
-	ELSE IF @ViewName = 'vManager'
+    -- View for Manager (except HR manager)
+    ELSE IF @ViewName = 'vManager'
     BEGIN
         IF EXISTS (SELECT 1 FROM sys.views WHERE Name = 'vManager')
-		BEGIN
-			EXEC('DROP VIEW vManager')
-		END
+        BEGIN
+            EXEC('DROP VIEW vManager')
+        END
 
         SET @SQL = '
-        CREATE OR ALTER VIEW vManager AS
-		SELECT EmployeeID, FullName, Gender, DateOfBirth, PhoneNumber, Salary, Allowance, TaxCode, DepartmentID
-		FROM Employees
-		WHERE DepartmentID IN (SELECT DepartmentID 
-								FROM Employees AS E JOIN Accounts AS A ON E.EmployeeID = A.EmployeeID 
-								WHERE AccountID = ' + CAST(@AccountID AS NVARCHAR) + ')'
+        CREATE VIEW vManager AS
+        SELECT EmployeeID, FullName, Gender, DateOfBirth, PhoneNumber,
+               CONVERT(VARCHAR(MAX), DECRYPTBYKEY(Salary)) AS Salary,
+               CONVERT(VARCHAR(MAX), DECRYPTBYKEY(Allowance)) AS Allowance,
+               TaxCode, DepartmentID
+        FROM Employees
+        WHERE DepartmentID IN (SELECT DepartmentID 
+                               FROM Employees AS E 
+                               JOIN Accounts AS A ON E.EmployeeID = A.EmployeeID 
+                               WHERE A.AccountID = ' + CAST(@AccountID AS NVARCHAR) + ')'
 
         EXEC sp_executesql @SQL
 
         SELECT * FROM vManager
     END
 
-	-- View cho Nhan vien phong Nhan su
-	ELSE IF @ViewName = 'vEmployeePersonnel'
+    -- View for HR Employees
+    ELSE IF @ViewName = 'vEmployeePersonnel'
     BEGIN
         IF EXISTS (SELECT 1 FROM sys.views WHERE Name = 'vEmployeePersonnel')
-		BEGIN
-			EXEC('DROP VIEW vEmployeePersonnel')
-		END
+        BEGIN
+            EXEC('DROP VIEW vEmployeePersonnel')
+        END
 
         SET @SQL = '
         CREATE VIEW vEmployeePersonnel AS
-		SELECT EmployeeID, FullName, Gender, DateOfBirth, PhoneNumber, Salary, TaxCode, DepartmentID
-		FROM Employees
-		WHERE DepartmentID NOT IN (SELECT DepartmentID 
-								   FROM Employees AS E JOIN Accounts AS A ON E.EmployeeID = A.EmployeeID 
-								   WHERE AccountID = ' + CAST(@AccountID AS NVARCHAR) + ')'
+        SELECT EmployeeID, FullName, Gender, DateOfBirth, PhoneNumber, TaxCode, DepartmentID
+        FROM Employees
+        WHERE DepartmentID NOT IN (SELECT DepartmentID 
+                                   FROM Employees AS E 
+                                   JOIN Accounts AS A ON E.EmployeeID = A.EmployeeID 
+                                   WHERE A.AccountID = ' + CAST(@AccountID AS NVARCHAR) + ')'
 
         EXEC sp_executesql @SQL
 
         SELECT * FROM vEmployeePersonnel
     END
 
-	-- View cho Truong phong Nhan su bang Employees
-	ELSE IF @ViewName = 'vManagerPersonnel'
+    -- View for HR Manager
+    ELSE IF @ViewName = 'vManagerPersonnel'
     BEGIN
         IF EXISTS (SELECT 1 FROM sys.views WHERE Name = 'vManagerPersonnel')
-		BEGIN
-			EXEC('DROP VIEW vManagerPersonnel')
-		END
+        BEGIN
+            EXEC('DROP VIEW vManagerPersonnel')
+        END
 
         SET @SQL = '
         CREATE VIEW vManagerPersonnel AS
-		SELECT EmployeeID, FullName, Gender, DateOfBirth, PhoneNumber, TaxCode, DepartmentID
-		FROM Employees'
+        SELECT EmployeeID, FullName, Gender, DateOfBirth, PhoneNumber, TaxCode, DepartmentID
+        FROM Employees'
 
         EXEC sp_executesql @SQL
 
         SELECT * FROM vManagerPersonnel
     END
 
-	-- View cho Nhan vien phong Tai vu
-	ELSE IF @ViewName = 'vEmployeeFinancial'
+    -- View for Financial Employees
+    ELSE IF @ViewName = 'vEmployeeFinancial'
     BEGIN
         IF EXISTS (SELECT 1 FROM sys.views WHERE Name = 'vEmployeeFinancial')
-		BEGIN
-			EXEC('DROP VIEW vEmployeeFinancial')
-		END
+        BEGIN
+            EXEC('DROP VIEW vEmployeeFinancial')
+        END
 
         SET @SQL = '
         CREATE VIEW vEmployeeFinancial AS
-		SELECT EmployeeID, FullName, Gender, DateOfBirth, PhoneNumber, Salary, Allowance, TaxCode, DepartmentID
-		FROM Employees
-		WHERE DepartmentID IN (SELECT DepartmentID 
-							   FROM Employees AS E JOIN Accounts AS A ON E.EmployeeID = A.EmployeeID 
-							   WHERE AccountID = ' + CAST(@AccountID AS NVARCHAR) + ')
-		UNION
-		SELECT EmployeeID, NULL, NULL, NULL, NULL, Salary, Allowance, TaxCode, NULL
-		FROM Employees
-		WHERE DepartmentID NOT IN (SELECT DepartmentID 
-								   FROM Employees AS E JOIN Accounts AS A ON E.EmployeeID = A.EmployeeID 
-								   WHERE AccountID = ' + CAST(@AccountID AS NVARCHAR) + ')'
+        SELECT EmployeeID, FullName, Gender, DateOfBirth, PhoneNumber, 
+               CONVERT(VARCHAR(MAX), DECRYPTBYKEY(Salary)) AS Salary, 
+               CONVERT(VARCHAR(MAX), DECRYPTBYKEY(Allowance)) AS Allowance,
+               TaxCode, DepartmentID
+        FROM Employees
+        WHERE DepartmentID IN (SELECT DepartmentID 
+                               FROM Employees AS E 
+                               JOIN Accounts AS A ON E.EmployeeID = A.EmployeeID 
+                               WHERE A.AccountID = ' + CAST(@AccountID AS NVARCHAR) + ')
+        UNION
+        SELECT EmployeeID, NULL AS FullName, NULL AS Gender, NULL AS DateOfBirth, 
+               NULL AS PhoneNumber,  CONVERT(VARCHAR(MAX), DECRYPTBYKEY(Salary)) AS Salary,
+               CONVERT(VARCHAR(MAX), DECRYPTBYKEY(Allowance)) AS Allowance, TaxCode, NULL AS DepartmentID
+        FROM Employees
+        WHERE DepartmentID NOT IN (SELECT DepartmentID 
+                                   FROM Employees AS E 
+                                   JOIN Accounts AS A ON E.EmployeeID = A.EmployeeID 
+                                   WHERE A.AccountID = ' + CAST(@AccountID AS NVARCHAR) + ')'
 
         EXEC sp_executesql @SQL
 
         SELECT * FROM vEmployeeFinancial
     END
 
-	-- View cho Giam Doc
-	ELSE IF @ViewName = 'vPresident'
+    -- View for President
+    ELSE IF @ViewName = 'vPresident'
     BEGIN
         IF EXISTS (SELECT 1 FROM sys.views WHERE Name = 'vPresident')
-		BEGIN
-			EXEC('DROP VIEW vPresident')
-		END
+        BEGIN
+            EXEC('DROP VIEW vPresident')
+        END
 
         SET @SQL = '
         CREATE VIEW vPresident AS
-		SELECT EmployeeID, FullName, Gender, DateOfBirth, PhoneNumber, Salary, Allowance, TaxCode, DepartmentID
-		FROM Employees'
+        SELECT EmployeeID, FullName, Gender, DateOfBirth, PhoneNumber,
+               CONVERT(VARCHAR(MAX), DECRYPTBYKEY(Salary)) AS Salary,
+               CONVERT(VARCHAR(MAX), DECRYPTBYKEY(Allowance)) AS Allowance,
+               TaxCode, DepartmentID
+        FROM Employees'
 
         EXEC sp_executesql @SQL
 
         SELECT * FROM vPresident
     END
-	ELSE
-	BEGIN
-		DECLARE @ColumnName VARCHAR(MAX)
-		SELECT @ColumnName = ColumnName
-		FROM RolePermissions
-		WHERE RoleID = 1
-		AND PermissionID = 1
-		IF @ColumnName IS NOT NULL
-		BEGIN
-			-- Tạo câu lệnh SQL động để chọn dữ liệu từ bảng Employees với các cột được chỉ định
-			SET @SQL = '
-			SELECT ' + @ColumnName + '
-			FROM Employees'
+    ELSE
+    BEGIN
+        DECLARE @ColumnName VARCHAR(MAX)
+        SELECT @ColumnName = ColumnName
+        FROM RolePermissions
+        WHERE RoleID = 1
+          AND PermissionID = 1
 
-			-- Thực thi câu lệnh SQL động
-			EXEC sp_executesql @SQL;
-		END
-		ELSE
-		BEGIN
-			PRINT N'Không tìm thấy tên cột.'
-		END
-	END
+        IF @ColumnName IS NOT NULL
+        BEGIN
+            -- Create dynamic SQL to select data from Employees with specified columns
+            SET @SQL = '
+            SELECT ' + @ColumnName + '
+            FROM Employees'
+
+            -- Execute dynamic SQL
+            EXEC sp_executesql @SQL;
+        END
+        ELSE
+        BEGIN
+            PRINT N'Không tìm thấy tên cột.'
+        END
+    END
+
+    CLOSE SYMMETRIC KEY EmployeeSymKey
 END
 GO
 
--- EXEC spSelectEmployees 5
+EXEC spSelectEmployees 7
+GO
 CREATE OR ALTER PROC spInsertEmployees
     @RoleID INT,
 	@ValueList NVARCHAR(MAX)
@@ -883,7 +912,8 @@ CREATE OR ALTER PROC spLogin
     @USERNAME VARCHAR(50),
     @PASSWORD VARCHAR(50),
     @KETQUA INT OUTPUT,
-    @ROLENAME VARCHAR(100) OUTPUT
+    @ROLEID INT OUTPUT, -- Thay đổi để xuất RoleID
+    @NAME VARCHAR(MAX) OUTPUT -- Thay đổi để xuất danh sách Name
 AS
 BEGIN
     DECLARE @SALT UNIQUEIDENTIFIER
@@ -913,14 +943,24 @@ BEGIN
         -- Nếu khớp, gán kết quả là 1
         SET @KETQUA = 1
 
-        -- Lấy RoleName từ bảng Roles dựa trên RoleId trong bảng AccountRoles
-        SELECT @ROLENAME = R.RoleName
+        -- Lấy RoleID từ bảng Roles dựa trên RoleId trong bảng AccountRoles
+        SELECT @ROLEID = R.RoleId
         FROM Roles R
         INNER JOIN AccountRoles AR ON R.RoleId = AR.RoleId
         INNER JOIN Accounts A ON AR.AccountId = A.AccountID
         WHERE A.[Username] = @USERNAME
 
-        -- Nếu không tìm thấy RoleName tương ứng, gán @ROLENAME = NULL hoặc thực hiện các xử lý tùy thuộc vào yêu cầu của bạn
+        -- Nếu không tìm thấy RoleID tương ứng, gán @ROLEID = NULL hoặc thực hiện các xử lý tùy thuộc vào yêu cầu của bạn
+        IF @ROLEID IS NULL
+        BEGIN
+            SET @NAME = NULL
+            RETURN
+        END
+
+        -- Lấy các quyền từ bảng RolePermissions dựa trên RoleId và ghép các tên quyền thành một chuỗi
+        SELECT @NAME = STRING_AGG(Name, ',')
+        FROM RolePermissions
+        WHERE RoleID = @ROLEID
     END
     ELSE
     BEGIN

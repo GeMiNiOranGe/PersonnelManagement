@@ -29,44 +29,94 @@
         private void InitializeComponent()
         {
             this.btnLogin = new System.Windows.Forms.Button();
-            this.txtUsername = new System.Windows.Forms.TextBox();
-            this.txtPassword = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.txtPassword = new System.Windows.Forms.RichTextBox();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.txtUsername = new System.Windows.Forms.RichTextBox();
+            this.btnExit = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnLogin
             // 
-            this.btnLogin.Location = new System.Drawing.Point(289, 127);
+            this.btnLogin.BackColor = System.Drawing.Color.PowderBlue;
+            this.btnLogin.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.btnLogin.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnLogin.ForeColor = System.Drawing.SystemColors.MenuHighlight;
+            this.btnLogin.Location = new System.Drawing.Point(151, 214);
             this.btnLogin.Name = "btnLogin";
-            this.btnLogin.Size = new System.Drawing.Size(75, 23);
+            this.btnLogin.Size = new System.Drawing.Size(236, 40);
             this.btnLogin.TabIndex = 0;
-            this.btnLogin.Text = "button1";
-            this.btnLogin.UseVisualStyleBackColor = true;
+            this.btnLogin.Text = "Login";
+            this.btnLogin.UseVisualStyleBackColor = false;
             this.btnLogin.Click += new System.EventHandler(this.btnLogin_Click);
             // 
-            // txtUsername
+            // label3
             // 
-            this.txtUsername.Location = new System.Drawing.Point(196, 50);
-            this.txtUsername.Name = "txtUsername";
-            this.txtUsername.Size = new System.Drawing.Size(236, 20);
-            this.txtUsername.TabIndex = 1;
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Trebuchet MS", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.ForeColor = System.Drawing.Color.Red;
+            this.label3.Location = new System.Drawing.Point(245, 40);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(55, 22);
+            this.label3.TabIndex = 6;
+            this.label3.Text = "Log in";
             // 
             // txtPassword
             // 
-            this.txtPassword.Location = new System.Drawing.Point(196, 88);
+            this.txtPassword.Location = new System.Drawing.Point(151, 137);
             this.txtPassword.Name = "txtPassword";
-            this.txtPassword.Size = new System.Drawing.Size(236, 20);
-            this.txtPassword.TabIndex = 2;
+            this.txtPassword.Size = new System.Drawing.Size(236, 34);
+            this.txtPassword.TabIndex = 9;
+            this.txtPassword.Text = "";
             // 
-            // Login
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(152, 179);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(77, 17);
+            this.checkBox1.TabIndex = 11;
+            this.checkBox1.Text = "Remember";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            // 
+            // txtUsername
+            // 
+            this.txtUsername.Location = new System.Drawing.Point(151, 89);
+            this.txtUsername.Name = "txtUsername";
+            this.txtUsername.Size = new System.Drawing.Size(236, 34);
+            this.txtUsername.TabIndex = 12;
+            this.txtUsername.Text = "";
+            // 
+            // btnExit
+            // 
+            this.btnExit.BackColor = System.Drawing.Color.PowderBlue;
+            this.btnExit.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.btnExit.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnExit.ForeColor = System.Drawing.SystemColors.MenuHighlight;
+            this.btnExit.Location = new System.Drawing.Point(152, 275);
+            this.btnExit.Name = "btnExit";
+            this.btnExit.Size = new System.Drawing.Size(236, 40);
+            this.btnExit.TabIndex = 13;
+            this.btnExit.Text = "Exit";
+            this.btnExit.UseVisualStyleBackColor = false;
+            this.btnExit.Click += new System.EventHandler(this.btnExit_Click);
+            // 
+            // FormLogin
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(532, 262);
-            this.Controls.Add(this.txtPassword);
+            this.BackColor = System.Drawing.Color.SkyBlue;
+            this.ClientSize = new System.Drawing.Size(532, 348);
+            this.Controls.Add(this.btnExit);
             this.Controls.Add(this.txtUsername);
+            this.Controls.Add(this.checkBox1);
+            this.Controls.Add(this.txtPassword);
+            this.Controls.Add(this.label3);
             this.Controls.Add(this.btnLogin);
-            this.Name = "Login";
+            this.Name = "FormLogin";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Login";
+            this.Load += new System.EventHandler(this.FormLogin_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -75,7 +125,10 @@
         #endregion
 
         private System.Windows.Forms.Button btnLogin;
-        private System.Windows.Forms.TextBox txtUsername;
-        private System.Windows.Forms.TextBox txtPassword;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.RichTextBox txtPassword;
+        private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.RichTextBox txtUsername;
+        private System.Windows.Forms.Button btnExit;
     }
 }

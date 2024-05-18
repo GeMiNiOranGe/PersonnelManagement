@@ -17,21 +17,23 @@ namespace Business
             accountData = new Data.AccountData();
         }
 
-        public void Login(string username, string password, out int result, out string roleName)
+        public void Login(string username, string password, out int result, out int roleID, out string name)
         {
             SqlParameter[] parameters = new SqlParameter[]
             {
                 new SqlParameter("@USERNAME", SqlDbType.VarChar) { Value = username },
                 new SqlParameter("@PASSWORD", SqlDbType.VarChar) { Value = password },
                 new SqlParameter("@KETQUA", SqlDbType.Int) { Direction = ParameterDirection.Output },
-                new SqlParameter("@ROLENAME", SqlDbType.NVarChar, 100) { Direction = ParameterDirection.Output }
+                new SqlParameter("@ROLEID", SqlDbType.Int) { Direction = ParameterDirection.Output },
+                new SqlParameter("@NAME", SqlDbType.VarChar, -1) { Direction = ParameterDirection.Output }
             };
 
             DataTable dataTable = accountData.ExecuteStoredProcedure("spLogin", parameters);
 
-            // Lấy kết quả đăng nhập và role name từ kết quả trả về của stored procedure
+            // Lấy kết quả đăng nhập, roleID và name từ kết quả trả về của stored procedure
             result = Convert.ToInt32(parameters[2].Value);
-            roleName = parameters[3].Value.ToString();
+            roleID = parameters[3].Value == DBNull.Value ? 0 : Convert.ToInt32(parameters[3].Value);
+            name = parameters[4].Value.ToString();
         }
     }
 }
