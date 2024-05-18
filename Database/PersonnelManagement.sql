@@ -788,46 +788,102 @@ EXEC spInsertEmployees 5, N'Nguyễn Cát Tường,1,20031119,0234671652,7000000
 --EmployeeID, FullName, Gender, DateOfBirth, PhoneNumber, TaxCode, DepartmentID
 select * from employees
 -- Update bang Employees
-CREATE OR ALTER PROC spUpdateEmployees
-	@RoleName VARCHAR(50),
-    @EmployeeID VARCHAR(10),
-    @ColumnList NVARCHAR(MAX),
-    @ValueList NVARCHAR(MAX)
-AS
-BEGIN
-    -- Tao bang de luu tru tam thoi cac cap nhat
-    DECLARE @UpdatesTable TABLE (ColumnName NVARCHAR(100), Value SQL_VARIANT)
+GO
+CREATE OR ALTER PROCEDURE dbo.usp_UpdateEmployee
+    @RoleID     INT,
+    @ValueList  NVARCHAR(MAX),
+    @EmployeeID VARCHAR(10)
+AS BEGIN
+    DECLARE @ViewName VARCHAR(50)
+    DECLARE @ColumnList NVARCHAR(MAX)
 
-	-- Truy van de lay cac cot tu bang RolePermissions
-	INSERT INTO @UpdatesTable (ColumnName)
-	SELECT Name
-	FROM RolePermissions RP
-    JOIN Roles R ON RP.RoleID = R.RoleID
-    JOIN Permissions P ON RP.PermissionID = P.PermissionID
-    WHERE R.RoleName = @RoleName
-    AND P.PermissionName = 'UPDATE'
+    SELECT @ViewName = Name
+    FROM RolePermissions
+    WHERE RoleID = @RoleID
+    AND PermissionID = 3
 
-    -- Chuyen doi danh sach gia tri thanh bang tam thoi
-    DECLARE @Value TABLE (Value SQL_VARIANT);
-    INSERT INTO @Value (Value)
-    SELECT value
+    SELECT @ColumnList = ColumnName
+    FROM RolePermissions
+    WHERE RoleID = @RoleID
+    AND PermissionID = 3
+    AND Name = @ViewName
+
+    DECLARE @ColumnTable TABLE (Value NVARCHAR(MAX), RowNum INT)
+    INSERT INTO @ColumnTable(Value, RowNum)
+    SELECT value, ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS RowNum
+    FROM STRING_SPLIT(@ColumnList, ',')
+
+    DECLARE @ValueTable TABLE (Value NVARCHAR(MAX), RowNum INT)
+    INSERT INTO @ValueTable(Value, RowNum)
+    SELECT value, ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS RowNum
     FROM STRING_SPLIT(@ValueList, ',')
 
-	-- Chuyen cac gia tri tu bang tam thoi sang bang cap nhat
-	UPDATE u
-    SET u.Value = v.Value
-    FROM @UpdatesTable u
-    JOIN @Value v ON u.ColumnName = 'Column' + CAST(ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS NVARCHAR(10))
+    DELETE VT
+    FROM @ValueTable VT
+    JOIN @ColumnTable CT ON VT.RowNum + 1 = CT.RowNum
+    WHERE CT.Value IS NULL OR CT.Value = 'NULL' OR CT.Value = 'null'
 
-	-- Tao cau lenh UPDATE dong
-    DECLARE @UpdateQuery NVARCHAR(MAX) = N'UPDATE Employees SET '
-    SELECT @UpdateQuery += QUOTENAME(ColumnName) + ' = Value, '
-    FROM @UpdatesTable
+    DELETE FROM @ColumnTable WHERE Value = 'null' OR Value = 'NULL'
 
-    SET @UpdateQuery = LEFT(@UpdateQuery, LEN(@UpdateQuery) - 1) + ' WHERE EmployeeID = @EmployeeID;'
+    -- Bảng tạm để lưu trữ các câu lệnh UPDATE
+    DECLARE @UpdateCommands TABLE (UpdateCommand NVARCHAR(MAX))
 
-    -- Thuc thi cau lenh UPDATE
-    EXEC sp_executesql @UpdateQuery, N'@EmployeeID VARCHAR(10)', @EmployeeID
+    -- Xây dựng các câu lệnh UPDATE động
+    DECLARE @EncryptedValue VARBINARY(MAX)
+    DECLARE @SQL NVARCHAR(MAX)
+
+    -- Vòng lặp qua các giá trị trong @ColumnTable và @ValueTable để xây dựng câu lệnh UPDATE
+    DECLARE @ColumnValue NVARCHAR(MAX)
+    DECLARE @Value NVARCHAR(MAX)
+
+    DECLARE UpdateCursor CURSOR FOR
+    SELECT CT.Value, VT.Value
+    FROM @ColumnTable CT
+    JOIN @ValueTable VT ON CT.RowNum = VT.RowNum + 1
+
+    OPEN UpdateCursor
+    FETCH NEXT FROM UpdateCursor INTO @ColumnValue, @Value
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        -- Kiểm tra nếu giá trị của cột là 'Salary' hoặc 'Allowance' thì mã hóa giá trị
+        IF @ColumnValue = 'Salary' OR @ColumnValue = 'Allowance'
+        BEGIN
+            IF @Value = 'null' OR @Value = 'NULL'
+            BEGIN
+                SET @SQL = 'UPDATE Employees SET ' + @ColumnValue + ' = null WHERE EmployeeID = ''' + @EmployeeID + ''''
+            END
+            ELSE
+            BEGIN
+                OPEN SYMMETRIC KEY EmployeeSymKey DECRYPTION BY PASSWORD = '123456'
+                SET @EncryptedValue = EncryptByKey(key_guid('EmployeeSymKey'), @Value)
+                CLOSE SYMMETRIC KEY EmployeeSymKey
+
+                -- Tạo câu lệnh UPDATE với giá trị mã hóa
+                SET @SQL = 'UPDATE Employees SET ' + @ColumnValue + ' = @EncryptedValue WHERE EmployeeID = ''' + @EmployeeID + ''''
+            END
+        END
+        ELSE
+        BEGIN
+            IF @Value = 'null' OR @Value = 'NULL'
+            BEGIN
+                -- Tạo câu lệnh UPDATE thông thường với giá trị NULL
+                SET @SQL = 'UPDATE Employees SET ' + @ColumnValue + ' = null WHERE EmployeeID = ''' + @EmployeeID + ''''
+            END
+            ELSE
+            BEGIN
+                -- Tạo câu lệnh UPDATE thông thường
+                SET @SQL = 'UPDATE Employees SET ' + @ColumnValue + ' = N''' + @Value + ''' WHERE EmployeeID = ''' + @EmployeeID + ''''
+            END
+        END
+        -- Thực thi câu lệnh
+        EXEC sp_executesql @SQL, N'@EncryptedValue VARBINARY(MAX)', @EncryptedValue
+
+        FETCH NEXT FROM UpdateCursor INTO @ColumnValue, @Value
+    END
+
+    CLOSE UpdateCursor
+    DEALLOCATE UpdateCursor
 END
 -------------------------------------------------------------------------------------------------------
 

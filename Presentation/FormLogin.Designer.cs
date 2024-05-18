@@ -31,7 +31,7 @@
             this.btnLogin = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.txtPassword = new System.Windows.Forms.RichTextBox();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.cbRemember = new System.Windows.Forms.CheckBox();
             this.txtUsername = new System.Windows.Forms.RichTextBox();
             this.btnExit = new System.Windows.Forms.Button();
             this.SuspendLayout();
@@ -69,15 +69,16 @@
             this.txtPassword.TabIndex = 9;
             this.txtPassword.Text = "";
             // 
-            // checkBox1
+            // cbRemember
             // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(152, 179);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(77, 17);
-            this.checkBox1.TabIndex = 11;
-            this.checkBox1.Text = "Remember";
-            this.checkBox1.UseVisualStyleBackColor = true;
+            this.cbRemember.AutoSize = true;
+            this.cbRemember.Location = new System.Drawing.Point(152, 179);
+            this.cbRemember.Name = "cbRemember";
+            this.cbRemember.Size = new System.Drawing.Size(77, 17);
+            this.cbRemember.TabIndex = 11;
+            this.cbRemember.Text = "Remember";
+            this.cbRemember.UseVisualStyleBackColor = true;
+            this.cbRemember.CheckedChanged += new System.EventHandler(this.cbRemember_CheckedChanged);
             // 
             // txtUsername
             // 
@@ -109,7 +110,7 @@
             this.ClientSize = new System.Drawing.Size(532, 348);
             this.Controls.Add(this.btnExit);
             this.Controls.Add(this.txtUsername);
-            this.Controls.Add(this.checkBox1);
+            this.Controls.Add(this.cbRemember);
             this.Controls.Add(this.txtPassword);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.btnLogin);
@@ -127,7 +128,7 @@
         private System.Windows.Forms.Button btnLogin;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.RichTextBox txtPassword;
-        private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.CheckBox cbRemember;
         private System.Windows.Forms.RichTextBox txtUsername;
         private System.Windows.Forms.Button btnExit;
     }

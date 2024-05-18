@@ -45,6 +45,14 @@ namespace Presentation
             employee.Show();
         }
 
-      
+        private void btnDepartment_Click(object sender, EventArgs e)
+        {
+            FormDepartment fdp= new FormDepartment();
+            fdp.TopLevel = false;
+            fdp.Dock = DockStyle.Fill;
+            fdp.FormBorderStyle = FormBorderStyle.None;
+            pnMenu.Controls.Add(fdp);
+            fdp.Show();
+        }
     }
 }

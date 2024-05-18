@@ -19,5 +19,9 @@ namespace Business
         {
             return departData.GetDepartments();
         }
+        public DataTable GetAllDepartments()
+        {
+            return departData.getAllDepartments();
+        }
     }
 }

@@ -11,7 +11,23 @@ namespace Data
 {
     public class EmployeeData
     {
-       
+        public int ExecuteStoredProcedure(string storedProcedureName, SqlParameter[] parameters)
+        {
+            using (SqlConnection connection = new SqlConnection(Config.connectionString))
+            {
+                connection.Open();
+                SqlCommand command = new SqlCommand(storedProcedureName, connection);
+                command.CommandType = CommandType.StoredProcedure;
+
+                if (parameters != null)
+                {
+                    command.Parameters.AddRange(parameters);
+                }
+
+                return command.ExecuteNonQuery();
+            }
+        }
+
         public DataTable getEmployeeByRoleID(int roleID)
         {
             DataTable dataTable = new DataTable();
@@ -27,6 +43,21 @@ namespace Data
                     }
                 }
             return dataTable;
+        }
+        public void updateEmployee(int roleID, string valueList, string employeeID)
+        {
+            using (SqlConnection connection = new SqlConnection(Config.connectionString))
+            {
+                connection.Open();
+                using (SqlCommand command = new SqlCommand("usp_UpdateEmployee", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@RoleID", roleID);
+                    command.Parameters.AddWithValue("@ValueList", valueList);
+                    command.Parameters.AddWithValue("@EmployeeID", employeeID);
+                    command.ExecuteNonQuery();
+                }
+            }
         }
     }
 }

@@ -31,7 +31,7 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.picLogout = new System.Windows.Forms.PictureBox();
             this.button3 = new System.Windows.Forms.Button();
-            this.btnSalary = new System.Windows.Forms.Button();
+            this.btnDepartment = new System.Windows.Forms.Button();
             this.btnEmployee = new System.Windows.Forms.Button();
             this.pnMenu = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
@@ -46,7 +46,7 @@
             // 
             this.groupBox1.Controls.Add(this.picLogout);
             this.groupBox1.Controls.Add(this.button3);
-            this.groupBox1.Controls.Add(this.btnSalary);
+            this.groupBox1.Controls.Add(this.btnDepartment);
             this.groupBox1.Controls.Add(this.btnEmployee);
             this.groupBox1.ForeColor = System.Drawing.SystemColors.ButtonFace;
             this.groupBox1.Location = new System.Drawing.Point(12, 116);
@@ -79,17 +79,18 @@
             this.button3.Text = "Export";
             this.button3.UseVisualStyleBackColor = false;
             // 
-            // btnSalary
+            // btnDepartment
             // 
-            this.btnSalary.BackColor = System.Drawing.Color.LightSkyBlue;
-            this.btnSalary.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSalary.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.btnSalary.Location = new System.Drawing.Point(10, 111);
-            this.btnSalary.Name = "btnSalary";
-            this.btnSalary.Size = new System.Drawing.Size(158, 49);
-            this.btnSalary.TabIndex = 1;
-            this.btnSalary.Text = "Salary";
-            this.btnSalary.UseVisualStyleBackColor = false;
+            this.btnDepartment.BackColor = System.Drawing.Color.LightSkyBlue;
+            this.btnDepartment.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnDepartment.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.btnDepartment.Location = new System.Drawing.Point(10, 111);
+            this.btnDepartment.Name = "btnDepartment";
+            this.btnDepartment.Size = new System.Drawing.Size(158, 49);
+            this.btnDepartment.TabIndex = 1;
+            this.btnDepartment.Text = "Department";
+            this.btnDepartment.UseVisualStyleBackColor = false;
+            this.btnDepartment.Click += new System.EventHandler(this.btnDepartment_Click);
             // 
             // btnEmployee
             // 
@@ -176,7 +177,7 @@
         private System.Windows.Forms.Label lbRole;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Button button3;
-        private System.Windows.Forms.Button btnSalary;
+        private System.Windows.Forms.Button btnDepartment;
         private System.Windows.Forms.PictureBox picLogout;
     }
 }

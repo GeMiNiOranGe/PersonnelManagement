@@ -214,6 +214,7 @@
             this.cbFemale.TabIndex = 8;
             this.cbFemale.Text = "Female";
             this.cbFemale.UseVisualStyleBackColor = true;
+            this.cbFemale.CheckedChanged += new System.EventHandler(this.cbFemale_CheckedChanged);
             // 
             // cbMale
             // 
@@ -224,6 +225,7 @@
             this.cbMale.TabIndex = 7;
             this.cbMale.Text = "Male";
             this.cbMale.UseVisualStyleBackColor = true;
+            this.cbMale.CheckedChanged += new System.EventHandler(this.cbMale_CheckedChanged);
             // 
             // txtName
             // 
@@ -278,6 +280,7 @@
             this.btnUpdate.Size = new System.Drawing.Size(54, 38);
             this.btnUpdate.TabIndex = 1;
             this.btnUpdate.UseVisualStyleBackColor = false;
+            this.btnUpdate.Click += new System.EventHandler(this.btnUpdate_Click);
             // 
             // btnAdd
             // 
