@@ -121,8 +121,8 @@ namespace Presentation
         {
             try
             {
-                int roleId = _roleID;
-                int roleIDAdd = Convert.ToInt32(cbRoleID.Text); 
+                int roleId =Convert.ToInt32(cbRoleID.Text);
+                int roleIDAdd = _roleID; 
                 int permissionId = Convert.ToInt32(cbPermission.Text);
                 string name = tbName.Text;
                 string columnName = GenerateColumnNameParameter();
