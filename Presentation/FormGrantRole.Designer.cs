@@ -49,7 +49,7 @@
             // dtgvGrant
             // 
             this.dtgvGrant.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dtgvGrant.Location = new System.Drawing.Point(135, 245);
+            this.dtgvGrant.Location = new System.Drawing.Point(135, 259);
             this.dtgvGrant.Name = "dtgvGrant";
             this.dtgvGrant.ReadOnly = true;
             this.dtgvGrant.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
@@ -70,7 +70,7 @@
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.cbRoleID);
             this.groupBox1.Controls.Add(this.label1);
-            this.groupBox1.Location = new System.Drawing.Point(135, 24);
+            this.groupBox1.Location = new System.Drawing.Point(141, 50);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(550, 203);
             this.groupBox1.TabIndex = 1;

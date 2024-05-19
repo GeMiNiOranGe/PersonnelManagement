@@ -47,6 +47,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FormAccountRole.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormAccountRole.Designer.cs">
+      <DependentUpon>FormAccountRole.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormDepartment.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -77,8 +83,23 @@
     <Compile Include="FormLogin.Designer.cs">
       <DependentUpon>FormLogin.cs</DependentUpon>
     </Compile>
+    <Compile Include="FormRole.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormRole.Designer.cs">
+      <DependentUpon>FormRole.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormRolePermission.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormRolePermission.Designer.cs">
+      <DependentUpon>FormRolePermission.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="FormAccountRole.resx">
+      <DependentUpon>FormAccountRole.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FormDepartment.resx">
       <DependentUpon>FormDepartment.cs</DependentUpon>
     </EmbeddedResource>
@@ -93,6 +114,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FormLogin.resx">
       <DependentUpon>FormLogin.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormRole.resx">
+      <DependentUpon>FormRole.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormRolePermission.resx">
+      <DependentUpon>FormRolePermission.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
