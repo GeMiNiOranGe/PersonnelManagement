@@ -885,18 +885,69 @@ AS BEGIN
     CLOSE UpdateCursor
     DEALLOCATE UpdateCursor
 END
--------------------------------------------------------------------------------------------------------
+GO
+--delete Employeee
+CREATE OR ALTER PROC spDeleteEmployee
+	@RoleID INT,
+	@EmployeeID VARCHAR(10)
+AS BEGIN
+	IF NOT EXISTS (SELECT 1 FROM RolePermissions WHERE RoleID = @RoleID AND PermissionID = 4)
+	BEGIN
+		PRINT '0'
+		RETURN
+	END
 
+	DELETE Employees WHERE EmployeeID = @EmployeeID
+END
+GO
 
+-- Cấp quyền cho Employeee
+CREATE OR ALTER PROC GrantRole
+	@RoleID INT,
+	@RoleIDAdd INT, 
+	@PermissionID INT, 
+	@Name VARCHAR(50), 
+	@ColumnName NVARCHAR(MAX)
+AS BEGIN
+	SET NOCOUNT ON
 
-
-
+	IF @RoleID = 1 
+	BEGIN
+		IF @Name = 'Employees'
+		BEGIN
+			IF @PermissionID = 4
+				INSERT INTO RolePermissions VALUES (@RoleIDAdd, @PermissionID, @Name, NULL)
+			ELSE
+				INSERT INTO RolePermissions VALUES (@RoleIDAdd, @PermissionID, @Name, @ColumnName)
+		END
+		ELSE
+		BEGIN
+			IF @PermissionID = 3
+				INSERT INTO RolePermissions VALUES (@RoleIDAdd, @PermissionID, @Name, @ColumnName)
+			ELSE 
+				INSERT INTO RolePermissions VALUES (@RoleIDAdd, @PermissionID, @Name, NULL)
+		END
+	END
+	ELSE
+	BEGIN
+		PRINT '0'
+		RETURN
+	END
+END
+EXEC GrantRole 1,3,1, 'Employees','EmployeeID'
+------------------
+-------------------------------------------------------------------------------------
+select *from RolePermissions
+select *from Accounts
+exec spDeleteEmployee 1,EMP00024
+select *from Employees
+select *from Roles
 
 
 --------------------------------------------------------------------------------------------------
 -- Viết trigger chặn select, insert, update, delete bảng trực tiếp
 --------------------------------------------------------------------------------------------------
-
+GO
 
 -- Tao Role moi
 CREATE OR ALTER PROC spInsertRole

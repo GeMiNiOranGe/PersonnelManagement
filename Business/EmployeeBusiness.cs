@@ -32,5 +32,9 @@ namespace Business
             int kq = empData.ExecuteStoredProcedure("usp_UpdateEmployee", parameters);
             return kq > 0;
         }
+        public bool deleteEmployee(int roleID, string employeeID)
+        {
+            return empData.deleteEmployee(roleID, employeeID);
+        }
     }
 }

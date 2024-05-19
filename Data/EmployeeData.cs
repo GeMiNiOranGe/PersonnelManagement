@@ -59,5 +59,29 @@ namespace Data
                 }
             }
         }
+        public bool deleteEmployee(int roleID, string employeeID)
+        {
+            using (SqlConnection connection = new SqlConnection(Config.connectionString))
+            {
+                try
+                {
+                    using (SqlCommand command = new SqlCommand("spDeleteEmployee", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@RoleID", roleID);
+                        command.Parameters.AddWithValue("@EmployeeID", employeeID);
+
+                        connection.Open();
+                        int rowsAffected = command.ExecuteNonQuery();
+                        return rowsAffected > 0;
+                    }
+                }
+                catch (Exception ex)
+                {
+              
+                    throw new Exception("An error occurred while deleting the employee.", ex);
+                }
+            }
+        }
     }
 }

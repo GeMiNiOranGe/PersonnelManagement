@@ -19,6 +19,7 @@ namespace Presentation
             InitializeComponent();
             _roleID = roleID;
             lbRole.Text ="RoleID: "+roleID.ToString();
+     
         }
 
         private void picLogout_Click(object sender, EventArgs e)
@@ -36,7 +37,7 @@ namespace Presentation
         private void btnEmployee_Click(object sender, EventArgs e)
         {
            
-           
+           pnMenu.Controls.Clear();
             FormEmployee employee = new FormEmployee(_roleID);
             employee.TopLevel = false;
             employee.Dock = DockStyle.Fill;
@@ -47,6 +48,7 @@ namespace Presentation
 
         private void btnDepartment_Click(object sender, EventArgs e)
         {
+            pnMenu.Controls.Clear();
             FormDepartment fdp= new FormDepartment();
             fdp.TopLevel = false;
             fdp.Dock = DockStyle.Fill;
@@ -54,5 +56,23 @@ namespace Presentation
             pnMenu.Controls.Add(fdp);
             fdp.Show();
         }
+
+        private void btnGrant_Click(object sender, EventArgs e)
+        {
+            pnMenu.Controls.Clear();
+            FormGrantRole gr = new FormGrantRole(_roleID);
+            gr.TopLevel = false;
+            gr.Dock = DockStyle.Fill;
+            gr.FormBorderStyle = FormBorderStyle.None;
+            pnMenu.Controls.Add(gr);
+            gr.Show();
+        }
+
+        private void FormMenu_Load(object sender, EventArgs e)
+        {
+
+        }
+       
+
     }
 }

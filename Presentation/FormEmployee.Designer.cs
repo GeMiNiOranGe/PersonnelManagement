@@ -105,7 +105,6 @@
             this.cbbDepartment.Name = "cbbDepartment";
             this.cbbDepartment.Size = new System.Drawing.Size(142, 21);
             this.cbbDepartment.TabIndex = 21;
-            this.cbbDepartment.SelectedIndexChanged += new System.EventHandler(this.cbbDepartment_SelectedIndexChanged);
             // 
             // label9
             // 
@@ -269,6 +268,7 @@
             this.btnDelete.Size = new System.Drawing.Size(54, 38);
             this.btnDelete.TabIndex = 2;
             this.btnDelete.UseVisualStyleBackColor = false;
+            this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
             // 
             // btnUpdate
             // 

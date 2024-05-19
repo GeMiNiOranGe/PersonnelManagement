@@ -27,15 +27,8 @@ namespace Presentation
             loadDepartment();
             checkPermission(_roleID);
         }
-        private void FormEmployee_Load(object sender, EventArgs e)
-        {
-
-        }
+       
         #region Event
-        private void groupBox1_Enter(object sender, EventArgs e)
-            {
-                
-            }
         private void cbMale_CheckedChanged(object sender, EventArgs e)
         {
             if (cbMale.Checked)
@@ -71,10 +64,6 @@ namespace Presentation
             cbMale.Checked = !isFemale;
         }
     }
-        private void cbbDepartment_SelectedIndexChanged(object sender, EventArgs e)
-        {
-                
-        }
         private void btnUpdate_Click(object sender, EventArgs e)
         {
             try
@@ -118,6 +107,40 @@ namespace Presentation
             catch (Exception ex)
             {
                 MessageBox.Show("An error occurred: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        private void btnDelete_Click(object sender, EventArgs e)
+        {
+            if (dtgvEmployee.SelectedRows.Count > 0)
+            {
+                string employeeID = dtgvEmployee.SelectedRows[0].Cells["EmployeeID"].Value.ToString();
+
+                DialogResult result = MessageBox.Show("Are you sure you want to delete this employee?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
+                if (result == DialogResult.Yes)
+                {
+                    try
+                    {
+                        bool isDeleted = employeeBSS.deleteEmployee(_roleID,employeeID);
+                        if (isDeleted)
+                        {
+                            MessageBox.Show("Employee deleted successfully!", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            LoadEmployeeData();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Failed to delete employee or insufficient permissions.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("Please select an employee to delete.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -184,8 +207,18 @@ namespace Presentation
 
 
 
+
+
         #endregion
 
-        
+        private void groupBox1_Enter(object sender, EventArgs e)
+        {
+
+        }
+
+        private void FormEmployee_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

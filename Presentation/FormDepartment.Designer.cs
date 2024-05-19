@@ -29,19 +29,19 @@
         private void InitializeComponent()
         {
             this.dtgvDepartment = new System.Windows.Forms.DataGridView();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.txtID = new System.Windows.Forms.TextBox();
-            this.txtName = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.textBox2 = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.btnAdd = new System.Windows.Forms.Button();
-            this.btnUpdate = new System.Windows.Forms.Button();
-            this.btnDelete = new System.Windows.Forms.Button();
             this.DepartmentID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.DepartmentName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ManagerID = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.btnDelete = new System.Windows.Forms.Button();
+            this.btnUpdate = new System.Windows.Forms.Button();
+            this.btnAdd = new System.Windows.Forms.Button();
+            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.txtName = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.txtID = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dtgvDepartment)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -55,9 +55,35 @@
             this.ManagerID});
             this.dtgvDepartment.Location = new System.Drawing.Point(104, 234);
             this.dtgvDepartment.Name = "dtgvDepartment";
+            this.dtgvDepartment.ReadOnly = true;
+            this.dtgvDepartment.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dtgvDepartment.Size = new System.Drawing.Size(669, 182);
             this.dtgvDepartment.TabIndex = 0;
             this.dtgvDepartment.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dtgvDepartment_CellContentClick);
+            // 
+            // DepartmentID
+            // 
+            this.DepartmentID.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.DepartmentID.DataPropertyName = "DepartmentID";
+            this.DepartmentID.HeaderText = "ID";
+            this.DepartmentID.Name = "DepartmentID";
+            this.DepartmentID.ReadOnly = true;
+            // 
+            // DepartmentName
+            // 
+            this.DepartmentName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.DepartmentName.DataPropertyName = "DepartmentName";
+            this.DepartmentName.HeaderText = "Name";
+            this.DepartmentName.Name = "DepartmentName";
+            this.DepartmentName.ReadOnly = true;
+            // 
+            // ManagerID
+            // 
+            this.ManagerID.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.ManagerID.DataPropertyName = "ManagerID";
+            this.ManagerID.HeaderText = "Manager";
+            this.ManagerID.Name = "ManagerID";
+            this.ManagerID.ReadOnly = true;
             // 
             // groupBox1
             // 
@@ -78,37 +104,35 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Function";
             // 
-            // label1
+            // btnDelete
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(150, 22);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(21, 13);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "ID:";
+            this.btnDelete.BackColor = System.Drawing.SystemColors.Menu;
+            this.btnDelete.Location = new System.Drawing.Point(294, 143);
+            this.btnDelete.Name = "btnDelete";
+            this.btnDelete.Size = new System.Drawing.Size(63, 31);
+            this.btnDelete.TabIndex = 8;
+            this.btnDelete.Text = "Delete";
+            this.btnDelete.UseVisualStyleBackColor = false;
             // 
-            // txtID
+            // btnUpdate
             // 
-            this.txtID.Location = new System.Drawing.Point(174, 19);
-            this.txtID.Name = "txtID";
-            this.txtID.Size = new System.Drawing.Size(129, 20);
-            this.txtID.TabIndex = 1;
+            this.btnUpdate.BackColor = System.Drawing.SystemColors.Menu;
+            this.btnUpdate.Location = new System.Drawing.Point(211, 143);
+            this.btnUpdate.Name = "btnUpdate";
+            this.btnUpdate.Size = new System.Drawing.Size(63, 31);
+            this.btnUpdate.TabIndex = 7;
+            this.btnUpdate.Text = "Update";
+            this.btnUpdate.UseVisualStyleBackColor = false;
             // 
-            // txtName
+            // btnAdd
             // 
-            this.txtName.Location = new System.Drawing.Point(174, 61);
-            this.txtName.Name = "txtName";
-            this.txtName.Size = new System.Drawing.Size(129, 20);
-            this.txtName.TabIndex = 3;
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(133, 64);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(38, 13);
-            this.label2.TabIndex = 2;
-            this.label2.Text = "Name:";
+            this.btnAdd.BackColor = System.Drawing.SystemColors.Menu;
+            this.btnAdd.Location = new System.Drawing.Point(120, 143);
+            this.btnAdd.Name = "btnAdd";
+            this.btnAdd.Size = new System.Drawing.Size(63, 31);
+            this.btnAdd.TabIndex = 6;
+            this.btnAdd.Text = "Add";
+            this.btnAdd.UseVisualStyleBackColor = false;
             // 
             // textBox2
             // 
@@ -126,56 +150,37 @@
             this.label3.TabIndex = 4;
             this.label3.Text = "Manager:";
             // 
-            // btnAdd
+            // txtName
             // 
-            this.btnAdd.BackColor = System.Drawing.SystemColors.Menu;
-            this.btnAdd.Location = new System.Drawing.Point(120, 143);
-            this.btnAdd.Name = "btnAdd";
-            this.btnAdd.Size = new System.Drawing.Size(63, 31);
-            this.btnAdd.TabIndex = 6;
-            this.btnAdd.Text = "Add";
-            this.btnAdd.UseVisualStyleBackColor = false;
+            this.txtName.Location = new System.Drawing.Point(174, 61);
+            this.txtName.Name = "txtName";
+            this.txtName.Size = new System.Drawing.Size(129, 20);
+            this.txtName.TabIndex = 3;
             // 
-            // btnUpdate
+            // label2
             // 
-            this.btnUpdate.BackColor = System.Drawing.SystemColors.Menu;
-            this.btnUpdate.Location = new System.Drawing.Point(211, 143);
-            this.btnUpdate.Name = "btnUpdate";
-            this.btnUpdate.Size = new System.Drawing.Size(63, 31);
-            this.btnUpdate.TabIndex = 7;
-            this.btnUpdate.Text = "Update";
-            this.btnUpdate.UseVisualStyleBackColor = false;
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(133, 64);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(38, 13);
+            this.label2.TabIndex = 2;
+            this.label2.Text = "Name:";
             // 
-            // btnDelete
+            // txtID
             // 
-            this.btnDelete.BackColor = System.Drawing.SystemColors.Menu;
-            this.btnDelete.Location = new System.Drawing.Point(294, 143);
-            this.btnDelete.Name = "btnDelete";
-            this.btnDelete.Size = new System.Drawing.Size(63, 31);
-            this.btnDelete.TabIndex = 8;
-            this.btnDelete.Text = "Delete";
-            this.btnDelete.UseVisualStyleBackColor = false;
+            this.txtID.Location = new System.Drawing.Point(174, 19);
+            this.txtID.Name = "txtID";
+            this.txtID.Size = new System.Drawing.Size(129, 20);
+            this.txtID.TabIndex = 1;
             // 
-            // DepartmentID
+            // label1
             // 
-            this.DepartmentID.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.DepartmentID.DataPropertyName = "DepartmentID";
-            this.DepartmentID.HeaderText = "ID";
-            this.DepartmentID.Name = "DepartmentID";
-            // 
-            // DepartmentName
-            // 
-            this.DepartmentName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.DepartmentName.DataPropertyName = "DepartmentName";
-            this.DepartmentName.HeaderText = "Name";
-            this.DepartmentName.Name = "DepartmentName";
-            // 
-            // ManagerID
-            // 
-            this.ManagerID.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.ManagerID.DataPropertyName = "ManagerID";
-            this.ManagerID.HeaderText = "Manager";
-            this.ManagerID.Name = "ManagerID";
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(150, 22);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(21, 13);
+            this.label1.TabIndex = 0;
+            this.label1.Text = "ID:";
             // 
             // FormDepartment
             // 

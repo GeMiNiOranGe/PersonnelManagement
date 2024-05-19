@@ -59,6 +59,12 @@
     <Compile Include="FormEmployee.Designer.cs">
       <DependentUpon>FormEmployee.cs</DependentUpon>
     </Compile>
+    <Compile Include="FormGrantRole.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormGrantRole.Designer.cs">
+      <DependentUpon>FormGrantRole.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormMenu.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -78,6 +84,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FormEmployee.resx">
       <DependentUpon>FormEmployee.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormGrantRole.resx">
+      <DependentUpon>FormGrantRole.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormMenu.resx">
       <DependentUpon>FormMenu.cs</DependentUpon>
@@ -138,6 +147,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\deleteicon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\IconPermiss.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\IconForbid.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

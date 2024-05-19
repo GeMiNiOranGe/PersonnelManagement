@@ -30,7 +30,7 @@
         {
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.picLogout = new System.Windows.Forms.PictureBox();
-            this.button3 = new System.Windows.Forms.Button();
+            this.btnGrant = new System.Windows.Forms.Button();
             this.btnDepartment = new System.Windows.Forms.Button();
             this.btnEmployee = new System.Windows.Forms.Button();
             this.pnMenu = new System.Windows.Forms.Panel();
@@ -45,7 +45,7 @@
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.picLogout);
-            this.groupBox1.Controls.Add(this.button3);
+            this.groupBox1.Controls.Add(this.btnGrant);
             this.groupBox1.Controls.Add(this.btnDepartment);
             this.groupBox1.Controls.Add(this.btnEmployee);
             this.groupBox1.ForeColor = System.Drawing.SystemColors.ButtonFace;
@@ -67,24 +67,25 @@
             this.picLogout.TabStop = false;
             this.picLogout.Click += new System.EventHandler(this.picLogout_Click);
             // 
-            // button3
+            // btnGrant
             // 
-            this.button3.BackColor = System.Drawing.Color.LightSkyBlue;
-            this.button3.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button3.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.button3.Location = new System.Drawing.Point(10, 199);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(158, 49);
-            this.button3.TabIndex = 2;
-            this.button3.Text = "Export";
-            this.button3.UseVisualStyleBackColor = false;
+            this.btnGrant.BackColor = System.Drawing.Color.LightSkyBlue;
+            this.btnGrant.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnGrant.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.btnGrant.Location = new System.Drawing.Point(10, 113);
+            this.btnGrant.Name = "btnGrant";
+            this.btnGrant.Size = new System.Drawing.Size(158, 49);
+            this.btnGrant.TabIndex = 2;
+            this.btnGrant.Text = "Grant Permissions";
+            this.btnGrant.UseVisualStyleBackColor = false;
+            this.btnGrant.Click += new System.EventHandler(this.btnGrant_Click);
             // 
             // btnDepartment
             // 
             this.btnDepartment.BackColor = System.Drawing.Color.LightSkyBlue;
             this.btnDepartment.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnDepartment.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.btnDepartment.Location = new System.Drawing.Point(10, 111);
+            this.btnDepartment.Location = new System.Drawing.Point(11, 196);
             this.btnDepartment.Name = "btnDepartment";
             this.btnDepartment.Size = new System.Drawing.Size(158, 49);
             this.btnDepartment.TabIndex = 1;
@@ -160,6 +161,7 @@
             this.Name = "FormMenu";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Menu";
+            this.Load += new System.EventHandler(this.FormMenu_Load);
             this.groupBox1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.picLogout)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
@@ -176,7 +178,7 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label lbRole;
         private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button btnGrant;
         private System.Windows.Forms.Button btnDepartment;
         private System.Windows.Forms.PictureBox picLogout;
     }
