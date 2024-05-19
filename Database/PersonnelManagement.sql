@@ -362,9 +362,9 @@ GO
 
 -- SP Cấp quyền
 CREATE OR ALTER PROC GrantRole
-	@RoleID INT,
-	@RoleIDAdd INT, 
-	@PermissionID INT, 
+	@RoleID INT,          -- ID trên app
+	@RoleIDAdd INT,		  -- ID cần cấp quyền
+	@PermissionID INT,    
 	@Name VARCHAR(50), 
 	@ColumnName NVARCHAR(MAX)
 AS BEGIN
@@ -393,6 +393,7 @@ AS BEGIN
 		RETURN
 	END
 END
+GO
 
 -- Cap quyen cho GiamDoc
 EXEC GrantRole 1, 2, 1, 'vPresident', null
@@ -432,7 +433,7 @@ BEGIN
         RETURN
     END CATCH
 
-    IF NOT EXISTS (SELECT * FROM RolePermissions WHERE PermissionID = 1 AND RoleID = @RoleID)
+    IF NOT EXISTS (SELECT 1 FROM RolePermissions WHERE PermissionID = 1 AND RoleID = @RoleID)
     BEGIN
         RETURN
     END
@@ -596,7 +597,8 @@ BEGIN
         SELECT @ColumnName = ColumnName
         FROM RolePermissions
         WHERE RoleID = 1
-          AND PermissionID = 1
+        AND PermissionID = 1
+		AND NAME = 'Employees'
 
         IF @ColumnName IS NOT NULL
         BEGIN
@@ -1039,7 +1041,7 @@ AS BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.Sample_Procedure 
+CREATE OR ALTER PROCEDURE spAudit 
     @RoleID INT
 AS BEGIN
     IF NOT EXISTS (
@@ -1067,6 +1069,12 @@ AS BEGIN
 
     EXECUTE sp_ExecuteSql @Stmt = @CreateViewStmt
 END
+GO
+
+CREATE TABLE TempTable
+(
+	AccountID INT
+)
 GO
 
 -- Login
@@ -1119,6 +1127,14 @@ BEGIN
             RETURN
         END
 
+		DECLARE @AccountID INT
+		SELECT @AccountID = AccountID FROM Accounts WHERE Username = @USERNAME
+
+		IF EXISTS (SELECT 1 FROM TempTable)
+			DELETE TempTable
+		ELSE
+			INSERT INTO TempTable VALUES (@AccountID)
+
         -- Lấy các quyền từ bảng RolePermissions dựa trên RoleId và ghép các tên quyền thành một chuỗi
         SELECT @NAME = STRING_AGG(Name, ',')
         FROM RolePermissions
@@ -1130,3 +1146,45 @@ BEGIN
         SET @KETQUA = 0
     END
 END
+GO
+
+CREATE OR ALTER TRIGGER trg_Employees_Audit
+ON Employees
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+    DECLARE @AccountID INT 
+	SELECT @AccountID = AccountID FROM TempTable
+
+	-- INSERT
+    INSERT INTO Logs (AccountID, TableName, PrimaryKeyValue, ActionType, LogDate)
+    SELECT
+        @AccountID,
+        'Employees',
+        CONVERT(VARCHAR(128), I.EmployeeID),
+        'Inserted',
+        GETDATE()
+    FROM INSERTED I
+
+    -- DELETE
+    INSERT INTO Logs (AccountID, TableName, PrimaryKeyValue, ActionType, LogDate)
+    SELECT
+        @AccountID,
+        'Employees', 
+        CONVERT(VARCHAR(128), D.EmployeeID),
+        'Deleted', 
+        GETDATE() 
+    FROM DELETED D
+
+    -- UPDATE
+    INSERT INTO Logs (AccountID, TableName, PrimaryKeyValue, ActionType, LogDate)
+	SELECT
+		@AccountID,
+		'Employees', 
+		CONVERT(VARCHAR(128), I.EmployeeID),
+		'Updated', 
+		GETDATE() 
+	FROM INSERTED I
+	JOIN DELETED D ON I.EmployeeID = D.EmployeeID
+END
+GO
