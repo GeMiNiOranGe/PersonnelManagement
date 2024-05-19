@@ -36,5 +36,9 @@ namespace Business
         {
             return empData.deleteEmployee(roleID, employeeID);
         }
+        public void InsertEmployee(string employeeId, string fullname, bool? gender, DateTime? dateOfBirth, string phoneNumber, string salary, string allowance, string taxCode, string departmentId)
+        {
+            empData.InsertEmployee(employeeId, fullname, gender, dateOfBirth, phoneNumber, salary, allowance, taxCode, departmentId);
+        }
     }
 }

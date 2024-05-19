@@ -70,12 +70,13 @@ namespace Presentation
             {
                 if (dtgvEmployee.Rows.Count > 0)
                 {
-                    string employeeID = txtID.Text;
-                    string fullName = txtName.Text;
-                    string phoneNumber = txtPhone.Text;
-                    string salary = txtSalary.Text;
-                    string allowance = txtAllowance.Text;
-                    string taxCode = txtTax.Text;
+                    
+                    string employeeID = txtID.Text.Trim();
+                    string fullName = txtName.Text.Trim();
+                    string phoneNumber = txtPhone.Text.Trim();
+                    string salary = txtSalary.Text.Trim();
+                    string allowance = txtAllowance.Text.Trim();
+                    string taxCode = txtTax.Text.Trim();
                     string departmentID = cbbDepartment.Text?.ToString() ?? string.Empty;
                     string dateOfBirth = dtpkDOB.Value.ToString("yyyy-MM-dd");
                     string gender = cbMale.Checked ? "0" : "1";
@@ -143,6 +144,47 @@ namespace Presentation
                 MessageBox.Show("Please select an employee to delete.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
+        private void btnAdd_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string employeeId = txtID.Text; 
+                string fullname = txtName.Text;
+                DateTime? dateOfBirth = dtpkDOB.Value; 
+                string phoneNumber = txtPhone.Text; 
+                string allowance = txtAllowance.Text; 
+                string salary=txtSalary.Text;
+                string taxCode = txtTax.Text; 
+                string departmentId = cbbDepartment.Text;
+                bool? gender = null;
+                if (cbMale.Checked)
+                {
+                    gender = false; // Male corresponds to true
+                }
+                else if (cbFemale.Checked)
+                {
+                    gender = true; // Female corresponds to false
+                }
+                employeeBSS.InsertEmployee(employeeId, fullname, gender, dateOfBirth, phoneNumber, salary, allowance, taxCode, departmentId);
+
+                MessageBox.Show("Employee inserted successfully!");
+                LoadEmployeeData();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error: {ex.Message}");
+            }
+        }
+        private void btnReload_Click(object sender, EventArgs e)
+        {
+            txtAllowance.Clear();
+           txtSalary.Clear();
+            txtTax.Clear();
+            txtID.Clear();
+            txtName.Clear();
+            txtPhone.Clear();
+            cbbDepartment.Text = null;
+        }
 
         #endregion
 
@@ -156,12 +198,6 @@ namespace Presentation
             try
             {
                 DataTable dt = employeeBSS.GetEmployeesByRoleID(_roleID);
-                if (dt == null || dt.Columns.Count == 0)
-                {
-                    MessageBox.Show("No data returned from the database.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
                 DisplayEmployees(dt);
             }
             catch (Exception ex)
@@ -188,7 +224,7 @@ namespace Presentation
         private void checkPermission(int roleID)
         {
            
-            if (roleID==3 || roleID==5 || roleID==7) 
+            if (roleID==5 || roleID==7) 
             {
                 dtgvEmployee.Columns["Salary"].Visible = false;
                 dtgvEmployee.Columns["Allowance"].Visible = false;
@@ -220,5 +256,7 @@ namespace Presentation
         {
 
         }
+
+        
     }
 }

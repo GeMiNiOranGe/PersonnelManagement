@@ -30,6 +30,7 @@
         {
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.picLogout = new System.Windows.Forms.PictureBox();
+            this.btnAR = new System.Windows.Forms.Button();
             this.btnGrant = new System.Windows.Forms.Button();
             this.btnDepartment = new System.Windows.Forms.Button();
             this.btnEmployee = new System.Windows.Forms.Button();
@@ -45,13 +46,14 @@
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.picLogout);
+            this.groupBox1.Controls.Add(this.btnAR);
             this.groupBox1.Controls.Add(this.btnGrant);
             this.groupBox1.Controls.Add(this.btnDepartment);
             this.groupBox1.Controls.Add(this.btnEmployee);
             this.groupBox1.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.groupBox1.Location = new System.Drawing.Point(12, 116);
+            this.groupBox1.Location = new System.Drawing.Point(12, 80);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(174, 360);
+            this.groupBox1.Size = new System.Drawing.Size(174, 417);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Function";
@@ -60,12 +62,25 @@
             // 
             this.picLogout.BackgroundImage = global::Presentation.Properties.Resources.logout;
             this.picLogout.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
-            this.picLogout.Location = new System.Drawing.Point(10, 271);
+            this.picLogout.Location = new System.Drawing.Point(3, 346);
             this.picLogout.Name = "picLogout";
             this.picLogout.Size = new System.Drawing.Size(76, 65);
             this.picLogout.TabIndex = 3;
             this.picLogout.TabStop = false;
             this.picLogout.Click += new System.EventHandler(this.picLogout_Click);
+            // 
+            // btnAR
+            // 
+            this.btnAR.BackColor = System.Drawing.Color.LightSkyBlue;
+            this.btnAR.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnAR.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.btnAR.Location = new System.Drawing.Point(10, 275);
+            this.btnAR.Name = "btnAR";
+            this.btnAR.Size = new System.Drawing.Size(158, 49);
+            this.btnAR.TabIndex = 3;
+            this.btnAR.Text = "AccountRole";
+            this.btnAR.UseVisualStyleBackColor = false;
+            this.btnAR.Click += new System.EventHandler(this.btnAR_Click);
             // 
             // btnGrant
             // 
@@ -120,7 +135,7 @@
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label1.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.label1.Location = new System.Drawing.Point(12, 9);
+            this.label1.Location = new System.Drawing.Point(18, 28);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(232, 24);
             this.label1.TabIndex = 2;
@@ -181,5 +196,6 @@
         private System.Windows.Forms.Button btnGrant;
         private System.Windows.Forms.Button btnDepartment;
         private System.Windows.Forms.PictureBox picLogout;
+        private System.Windows.Forms.Button btnAR;
     }
 }

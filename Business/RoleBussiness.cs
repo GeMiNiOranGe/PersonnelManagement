@@ -30,10 +30,13 @@ namespace Business
         {
             return rolePermissionData.getPermissionsID();
         }
-        public bool GrantRole(int roleId, int roleIDAdd, int permissionId, string name, string columnName)
+        public void GrantRole(int roleID, int roleIDAdd, int permissionID, string name, string columnName)
         {
-           bool checkGrant= rolePermissionData.GrantRole(roleId, roleIDAdd, permissionId, name, columnName);
-           return checkGrant;
+            rolePermissionData.GrantRole(roleID, roleIDAdd, permissionID, name, columnName);
+        }
+        public void UpdateRolePermission(int roleID, int roleIDAdd,int permissionID, string columnName)
+        {
+            rolePermissionData.UpdateRolePermission(roleID, roleIDAdd,permissionID, columnName);
         }
 
     }

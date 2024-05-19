@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.Common;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -73,13 +74,22 @@ namespace Presentation
         }
         private string GenerateColumnNameParameter()
         {
-            string selectedColumn = cbColumnName.Text?.ToString();
-            if (selectedColumn == "Salary" || selectedColumn == "Allowance" || selectedColumn== "EmployeeID" || selectedColumn== "Gender"|| 
-                selectedColumn== "DateOfBirth" || selectedColumn=="PhoneNumber" || selectedColumn=="TaxCode" || selectedColumn=="DepartmentID")
+            string selectedColumn = cbColumnName.Text;
+            if (string.IsNullOrWhiteSpace(selectedColumn) || selectedColumn == "NULL")
             {
-                return selectedColumn;
+                return null;
             }
-            return "NULL";
+            return selectedColumn;
+        }
+        private string getDatafromDtgv()
+        {
+            StringBuilder columns = new StringBuilder();
+            foreach (DataGridViewColumn column in dtgvGrant.Columns)
+            {
+                columns.Append(column.HeaderText + ",");
+            }
+            columns.Remove(columns.Length - 1, 1);
+            return columns.ToString();
         }
         #endregion
 
@@ -119,31 +129,47 @@ namespace Presentation
 
         private void btnPermiss_Click(object sender, EventArgs e)
         {
-            try
+            int roleID = _roleID;
+            int roleIDAdd = Convert.ToInt32(cbRoleID.Text);
+            int permissionID = Convert.ToInt32(cbPermission.Text);
+            string name = tbName.Text;
+            string columnName = GenerateColumnNameParameter();
+
+            // Only proceed if columnName is not empty
+            if (!string.IsNullOrWhiteSpace(columnName))
             {
-                int roleId =Convert.ToInt32(cbRoleID.Text);
-                int roleIDAdd = _roleID; 
-                int permissionId = Convert.ToInt32(cbPermission.Text);
-                string name = tbName.Text;
-                string columnName = GenerateColumnNameParameter();
-
-               bool checkGrantRole= roleBussiness.GrantRole(roleId, roleIDAdd, permissionId, name, columnName);
-                if (checkGrantRole)
-                {
-                    MessageBox.Show("Role granted successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    loadData();
-                } else
-                {
-                    MessageBox.Show("Role granted unsuccessfully!", "UnSuccess", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-
-             
+                roleBussiness.GrantRole(roleID, roleIDAdd, permissionID, name, columnName);
+                loadData();
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show("Please select a valid column name.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-    
+
+        private void btnForbid_Click(object sender, EventArgs e)
+        {
+            int roleID = _roleID;
+            int roldidAdd= Convert.ToInt32(cbRoleID.Text);
+            int permissionid=Convert.ToInt32(cbPermission.Text);
+            string columnName = cbColumnName.Text;
+            if (!string.IsNullOrWhiteSpace(columnName))
+            {
+                string currentColumns = getDatafromDtgv();
+
+                string[] columnArray = currentColumns.Split(',');
+
+                List<string> columnList = new List<string>(columnArray);
+                columnList.Remove(columnName);
+                string newColumns = string.Join(",", columnList);
+
+                roleBussiness.UpdateRolePermission(roleID, roldidAdd,permissionid, newColumns);
+                loadData();
+            }
+            else
+            {
+                MessageBox.Show("Please select a valid column name.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
     }
 }

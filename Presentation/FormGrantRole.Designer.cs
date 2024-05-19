@@ -86,6 +86,7 @@
             this.btnForbid.Size = new System.Drawing.Size(63, 47);
             this.btnForbid.TabIndex = 14;
             this.btnForbid.TabStop = false;
+            this.btnForbid.Click += new System.EventHandler(this.btnForbid_Click);
             // 
             // btnPermiss
             // 

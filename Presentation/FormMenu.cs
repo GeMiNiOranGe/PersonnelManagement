@@ -19,6 +19,7 @@ namespace Presentation
             InitializeComponent();
             _roleID = roleID;
             lbRole.Text ="RoleID: "+roleID.ToString();
+            checkPermission(_roleID);
      
         }
 
@@ -72,7 +73,25 @@ namespace Presentation
         {
 
         }
-       
+        private void checkPermission(int roleid)
+        {
+            if (roleid != 1)
+            {
+                btnDepartment.Visible = false;
+                btnAR.Visible = false;
+                btnGrant.Visible = false;
+            }
+        }
 
+        private void btnAR_Click(object sender, EventArgs e)
+        {
+            pnMenu.Controls.Clear();
+            FormAccountRole far=new FormAccountRole();
+            far.TopLevel = false;
+            far.Dock = DockStyle.Fill;
+            far.FormBorderStyle = FormBorderStyle.None;
+            pnMenu.Controls.Add(far);
+            far.Show();
+        }
     }
 }
