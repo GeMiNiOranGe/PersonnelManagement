@@ -33,7 +33,6 @@ namespace Presentation
 
             if (result == 1)
             {
-                MessageBox.Show($"Đăng nhập thành công! RoleID:{roleID}", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 if (cbRemember.Checked)
                 {
                     Properties.Settings.Default.Username = username;

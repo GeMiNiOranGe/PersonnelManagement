@@ -181,5 +181,8 @@
   <ItemGroup>
     <None Include="Resources\IconForbid.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\reloadIcon.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

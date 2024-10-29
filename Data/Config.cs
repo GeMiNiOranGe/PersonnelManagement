@@ -8,7 +8,7 @@ namespace Data
 {
     static class Config
     {
-       public static string connectionString = @"";
+       public static string connectionString = @"Data Source=.;Initial Catalog=PersonnelManagement;Integrated Security=True;Encrypt=True;TrustServerCertificate=True";
 
     }
 }
