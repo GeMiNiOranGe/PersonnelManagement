@@ -5,6 +5,14 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Security.Authentication;
+
+using Business.Utilities;
+using Business.Security;
+using Data;
+using DTO;
 
 namespace Business
 {
@@ -34,6 +42,36 @@ namespace Business
             result = Convert.ToInt32(parameters[2].Value);
             roleID = parameters[3].Value == DBNull.Value ? 0 : Convert.ToInt32(parameters[3].Value);
             name = parameters[4].Value.ToString();
+        }
+
+        public LoginStatus GetLoginStatus(string accountName, string password)
+        {
+            Account account = AccountData.Instance.GetAccountDetails(accountName);
+
+            var isSamePassword = false;
+
+            if (account != null)
+            {
+                string castSalt = DefaultConverter.GetString(account.Salt);
+                string saltedPassword = string.Concat(password, castSalt);
+                isSamePassword = Hasher.VerifyMessage(saltedPassword, account.Password, HashAlgorithmType.Sha256);
+            }
+
+            bool isValid = account != null && isSamePassword;
+
+            if (string.IsNullOrEmpty(accountName) || string.IsNullOrEmpty(password))
+            {
+                return LoginStatus.InvalidInput;
+            }
+            if (isValid)
+            {
+                return LoginStatus.Success;
+            }
+            if (!isValid)
+            {
+                return LoginStatus.InvalidAccount;
+            }
+            return LoginStatus.OtherError;
         }
     }
 }
