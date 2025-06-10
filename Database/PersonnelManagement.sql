@@ -1,10 +1,10 @@
-CREATE DATABASE PersonnelManagement
+﻿CREATE DATABASE PersonnelManagement
 GO
 
 USE PersonnelManagement
 GO
 
---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------
 -- Tao bang
 CREATE TABLE Departments (
     DepartmentID VARCHAR(10) PRIMARY KEY,
@@ -38,10 +38,7 @@ CREATE TABLE Logs (
     LogID INT PRIMARY KEY IDENTITY(1,1),
     AccountID INT NOT NULL,
     TableName VARCHAR(50) NOT NULL,
-    PrimaryKeyValue VARCHAR(MAX) NOT NULL,
-    ColumnName VARCHAR(50) NOT NULL,
-    OldValue NVARCHAR(MAX),
-    NewValue NVARCHAR(MAX),
+	PrimaryKeyValue VARCHAR(10) NOT NULL,
     ActionType VARCHAR(10) NOT NULL, -- INSERT, UPDATE, DELETE
     LogDate DATETIME NOT NULL DEFAULT GETDATE(),
     FOREIGN KEY (AccountID) REFERENCES Accounts(AccountID)
@@ -82,7 +79,7 @@ ALTER TABLE Departments
 ADD FOREIGN KEY (ManagerID) REFERENCES Employees(EmployeeID)
 GO
 
--------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------- 
 -- Tao key
 CREATE SYMMETRIC KEY EmployeeSymKey
     WITH ALGORITHM = AES_256
@@ -92,22 +89,22 @@ GO
 -- Ham tang DepartmentID
 CREATE OR ALTER FUNCTION setDepartmentID()
 RETURNS VARCHAR(10)
-AS
-BEGIN
+AS BEGIN
     DECLARE @MaxDepartmentID VARCHAR(10)
     DECLARE @NewDepartmentID VARCHAR(10)
     
     SELECT @MaxDepartmentID = MAX(DepartmentID) FROM Departments;
     
     SET @NewDepartmentID = CASE
-                            WHEN @MaxDepartmentID IS NULL THEN 'DEP00001'
-                            ELSE 'DEP' + RIGHT('00000' + CAST(CAST(SUBSTRING(@MaxDepartmentID, 4, LEN(@MaxDepartmentID)) AS INT) + 1 AS VARCHAR(8)), 5)
-                         END
+								WHEN @MaxDepartmentID IS NULL THEN 'DEP00001'
+								ELSE 'DEP' + RIGHT('00000' + CAST(CAST(SUBSTRING(@MaxDepartmentID, 4, LEN(@MaxDepartmentID)) AS INT) + 1 AS VARCHAR(8)), 5)
+						   END
     
     RETURN @NewDepartmentID
 END
 GO
 
+-- Them du lieu vao bang Phong ban
 INSERT INTO Departments VALUES (dbo.setDepartmentID(), N'Nhân sự', null)
 INSERT INTO Departments VALUES (dbo.setDepartmentID(), N'Tài vụ', null)
 INSERT INTO Departments VALUES (dbo.setDepartmentID(), N'Thiết kế', null)
@@ -124,7 +121,7 @@ BEGIN
     SELECT @MaxEmployeeID = MAX(EmployeeID) FROM Employees;
     
     SET @NewEmployeeID = CASE
-                            WHEN @MaxEmployeeID IS NULL THEN 'EMP00001'
+							WHEN @MaxEmployeeID IS NULL THEN 'EMP00001'
                             ELSE 'EMP' + RIGHT('00000' + CAST(CAST(SUBSTRING(@MaxEmployeeID, 4, LEN(@MaxEmployeeID)) AS INT) + 1 AS VARCHAR(8)), 5)
                          END
     
@@ -144,6 +141,8 @@ CREATE OR ALTER PROCEDURE spInsertEmployeeFull
     @TaxCode        VARCHAR(14)     = NULL,
     @DepartmentId   VARCHAR(10)
 AS BEGIN
+	SET NOCOUNT ON
+
 	IF @EmployeeId IS NULL
     SET @EmployeeId = dbo.setEmployeeID()
 
@@ -161,6 +160,7 @@ AS BEGIN
 END
 GO
 
+-- Them du lieu vao bang Nhan vien
 -- Truong phong Nhan su
 EXECUTE spInsertEmployeeFull
     @EmployeeId     = NULL
@@ -234,6 +234,12 @@ EXECUTE spInsertEmployeeFull
   , @DepartmentId   = 'DEP00003'
 GO
 
+-- UPDATE du lieu phong ban
+UPDATE Departments SET ManagerID = 'EMP00001' WHERE DepartmentID = 'DEP00001'
+UPDATE Departments SET ManagerID = 'EMP00002' WHERE DepartmentID = 'DEP00002'
+UPDATE Departments SET ManagerID = 'EMP00003' WHERE DepartmentID = 'DEP00003'
+GO
+
 -- Tao tai khoan Admin, GiamDoc (Khong co trong bang Employees)
 CREATE OR ALTER PROC spInsertAccount1
     @Username               VARCHAR(50)
@@ -287,7 +293,6 @@ EXEC spInsertAccount2 'EMP00003', 'EMP00003'
 EXEC spInsertAccount2 'EMP00004', 'EMP00004'
 EXEC spInsertAccount2 'EMP00005', 'EMP00005'
 EXEC spInsertAccount2 'EMP00006', 'EMP00006'
-GO
 
 INSERT INTO Roles VALUES ('Admin')
 INSERT INTO Roles VALUES ('GiamDoc')
@@ -352,109 +357,69 @@ SELECT 1, 3, 'Employees', LEFT(
                                 )) - 1
                             )
 INSERT INTO RolePermissions VALUES (1, 4, 'Employees', null)
-
--- Cap quyen cho GiamDoc
-INSERT INTO RolePermissions VALUES (2, 1, 'vPresident', null)
-INSERT INTO RolePermissions (RoleID, PermissionID, Name, ColumnName)
-SELECT 2, 3, 'vPresident', LEFT(
-                                (
-                                    SELECT STRING_AGG(
-                                        COALESCE(
-                                            CASE WHEN COLUMN_NAME IN ('Salary', 'Allowance')
-                                            THEN COLUMN_NAME + ','
-                                            END, 'NULL,'
-                                        ),
-                                        ''
-                                    )
-                                    FROM INFORMATION_SCHEMA.COLUMNS
-                                    WHERE TABLE_NAME = 'Employees'
-                                ),
-                                LEN((
-                                    SELECT STRING_AGG(
-                                        COALESCE(
-                                            CASE WHEN COLUMN_NAME IN ('Salary', 'Allowance')
-                                            THEN COLUMN_NAME + ','
-                                            END, 'NULL,'
-                                        ),
-                                        ''
-                                    )
-                                    FROM INFORMATION_SCHEMA.COLUMNS
-                                    WHERE TABLE_NAME = 'Employees'
-                                )) - 1
-                            )
-
--- Cap quyen cho TPNhanSu
-INSERT INTO RolePermissions VALUES (3, 1, 'vManagerPersonnel', null)
-INSERT INTO RolePermissions (RoleID, PermissionID, Name, ColumnName)
-SELECT 3, 3, 'vManagerPersonnel', LEFT(
-                                        (
-                                            SELECT STRING_AGG(
-                                                COALESCE(
-                                                    CASE WHEN COLUMN_NAME NOT IN ('Salary', 'Allowance')
-                                                    THEN COLUMN_NAME + ','
-                                                    END, 'NULL,'
-                                                ),
-                                                ''
-                                            )
-                                            FROM INFORMATION_SCHEMA.COLUMNS
-                                            WHERE TABLE_NAME = 'Employees'
-                                        ),
-                                        LEN((
-                                            SELECT STRING_AGG(
-                                                COALESCE(
-                                                    CASE WHEN COLUMN_NAME NOT IN ('Salary', 'Allowance')
-                                                    THEN COLUMN_NAME + ','
-                                                    END, 'NULL,'
-                                                ),
-                                                ''
-                                            )
-                                            FROM INFORMATION_SCHEMA.COLUMNS
-                                            WHERE TABLE_NAME = 'Employees'
-                                        )) - 1
-                                    )
-
--- Cap quyen cho TruongPhong
-INSERT INTO RolePermissions VALUES (4, 1, 'vManager', null)
-
--- Cap quyen cho NVNhanSu
-INSERT INTO RolePermissions VALUES (5, 1, 'vEmployeePersonnel', null)
-INSERT INTO RolePermissions VALUES (5, 2, 'vEmployeePersonnel', null)
-INSERT INTO RolePermissions (RoleID, PermissionID, Name, ColumnName)
-SELECT 3, 3, 'vManagerPersonnel', LEFT(
-                                        (
-                                            SELECT STRING_AGG(
-                                                COALESCE(
-                                                    CASE WHEN COLUMN_NAME NOT IN ('Salary', 'Allowance')
-                                                    THEN COLUMN_NAME + ','
-                                                    END, 'NULL,'
-                                                ),
-                                                ''
-                                            )
-                                            FROM INFORMATION_SCHEMA.COLUMNS
-                                            WHERE TABLE_NAME = 'Employees'
-                                        ),
-                                        LEN((
-                                            SELECT STRING_AGG(
-                                                COALESCE(
-                                                    CASE WHEN COLUMN_NAME NOT IN ('Salary', 'Allowance')
-                                                    THEN COLUMN_NAME + ','
-                                                    END, 'NULL,'
-                                                ),
-                                                ''
-                                            )
-                                            FROM INFORMATION_SCHEMA.COLUMNS
-                                            WHERE TABLE_NAME = 'Employees'
-                                        )) - 1
-                                    )
-
--- Cap quyen cho NVTaiVu
-INSERT INTO RolePermissions VALUES (6, 1, 'vEmployeeFinancial', null)
-
--- Cap quyen cho NhanVien
-INSERT INTO RolePermissions VALUES (7, 1, 'vEmployees', null)
+INSERT INTO RolePermissions VALUES (1, 1, 'vAuditLog', null)
 GO
 
--- Select bang Employees
+-- SP Cấp quyền
+CREATE OR ALTER PROC GrantRole
+	@RoleID INT,          -- ID trên app
+	@RoleIDAdd INT,		  -- ID cần cấp quyền
+	@PermissionID INT,    
+	@Name VARCHAR(50), 
+	@ColumnName NVARCHAR(MAX)
+AS BEGIN
+	SET NOCOUNT ON
+
+	IF @RoleID = 1 
+	BEGIN
+		IF @Name = 'Employees'
+		BEGIN
+			IF @PermissionID = 4
+				INSERT INTO RolePermissions VALUES (@RoleIDAdd, @PermissionID, @Name, NULL)
+			ELSE
+				INSERT INTO RolePermissions VALUES (@RoleIDAdd, @PermissionID, @Name, @ColumnName)
+		END
+		ELSE
+		BEGIN
+			IF @PermissionID = 3
+				INSERT INTO RolePermissions VALUES (@RoleIDAdd, @PermissionID, @Name, @ColumnName)
+			ELSE 
+				INSERT INTO RolePermissions VALUES (@RoleIDAdd, @PermissionID, @Name, NULL)
+		END
+	END
+	ELSE
+	BEGIN
+		PRINT '0'
+		RETURN
+	END
+END
+GO
+
+-- Cap quyen cho GiamDoc
+EXEC GrantRole 1, 2, 1, 'vPresident', null
+EXEC GrantRole 1, 2, 3, 'vPresident', 'NULL,NULL,NULL,NULL,NULL,Salary,Allowance,NULL,NULL'
+
+-- Cap quyen cho Truong phong Nhan su
+EXEC GrantRole 1, 3, 1, 'vManagerPersonnel', null
+EXEC GrantRole 1, 3, 3, 'vManagerPersonnel', 'EmployeeID,FullName,Gender,DateOfBirth,PhoneNumber,NULL,NULL,TaxCode,DepartmentID'
+EXEC GrantRole 1, 3, 1, 'vAuditLog', null
+
+-- Cap quyen cho Truong phong
+EXEC GrantRole 1, 4, 1, 'vManager', null
+
+-- Cap quyen cho Nhan vien Nhan su
+EXEC GrantRole 1, 5, 1, 'vEmployeePersonnel', null
+EXEC GrantRole 1, 5, 2, 'vEmployeePersonnel', null
+EXEC GrantRole 1, 5, 3, 'vEmployeePersonnel', 'EmployeeID,FullName,Gender,DateOfBirth,PhoneNumber,NULL,NULL,TaxCode,DepartmentID'
+
+-- Cap quyen cho Nhan vien Tai vu
+EXEC GrantRole 1, 6, 1, 'vEmployeeFinancial', null
+
+-- Cap quyen cho Nhan vien
+EXEC GrantRole 1, 7, 1, 'vEmployees', null
+GO
+
+-- SP Xem Nhan vien tuy quyen
 CREATE OR ALTER PROC spSelectEmployees
     @RoleID INT
 AS
@@ -468,7 +433,7 @@ BEGIN
         RETURN
     END CATCH
 
-    IF NOT EXISTS (SELECT * FROM RolePermissions WHERE PermissionID = 1 AND RoleID = @RoleID)
+    IF NOT EXISTS (SELECT 1 FROM RolePermissions WHERE PermissionID = 1 AND RoleID = @RoleID)
     BEGIN
         RETURN
     END
@@ -632,7 +597,8 @@ BEGIN
         SELECT @ColumnName = ColumnName
         FROM RolePermissions
         WHERE RoleID = 1
-          AND PermissionID = 1
+        AND PermissionID = 1
+		AND NAME = 'Employees'
 
         IF @ColumnName IS NOT NULL
         BEGIN
@@ -654,141 +620,314 @@ BEGIN
 END
 GO
 
-EXEC spSelectEmployees 7
-GO
-CREATE OR ALTER PROC spInsertEmployees
-    @RoleID INT,
+-- SP thêm nhan vien
+-- SP them nhan vien khi khong co view
+CREATE OR ALTER PROC spInsertEmployee1
+	@RoleID INT,
 	@ValueList NVARCHAR(MAX)
-AS
-BEGIN
-    -- Kiểm tra quyền của RoleID
-    IF NOT EXISTS (SELECT 1 FROM RolePermissions WHERE PermissionID = 2 AND RoleID = @RoleID)
-    BEGIN
-        PRINT 'OUT'
-        RETURN
-    END
+AS BEGIN
+	SET NOCOUNT ON
 
-    -- Lấy tên các cột từ view
-	--DECLARE @ValueList NVARCHAR(MAX) = N'Nguyễn Cát Tường,1,20031119,0234671652,70000000,123456789,null'
-    DECLARE @columnList NVARCHAR(MAX)
-    SELECT @columnList = COALESCE(@columnList + ', ', '') + COLUMN_NAME
-    FROM INFORMATION_SCHEMA.COLUMNS
-    WHERE TABLE_NAME = 'vEmployeePersonnel'
+	DECLARE @ViewName VARCHAR(50)
+	SELECT @ViewName = Name FROM RolePermissions WHERE RoleID = @RoleID AND PermissionID = 2
 
-    -- Tạo câu lệnh INSERT
-    DECLARE @insertQuery NVARCHAR(MAX)
-    SET @insertQuery = 'INSERT INTO Employees (' + @columnList + ') VALUES '
+	DECLARE @ColumnList NVARCHAR(MAX)
+	SELECT @ColumnList = ColumnName FROM RolePermissions WHERE RoleID = @RoleID AND PermissionID = 2 AND Name = @ViewName
+	SET @ColumnList = @ColumnList + ',null'
 
-    -- Phân tách chuỗi dữ liệu và ghép vào câu lệnh INSERT
-    SET @insertQuery = @insertQuery + '('
-	--print @insertQuery
--- Lặp qua từng giá trị trong chuỗi dữ liệu
-DECLARE @startIndex INT = 1
-DECLARE @endIndex INT = CHARINDEX(',', @ValueList, @startIndex)
-WHILE @endIndex > 0
-BEGIN
-    DECLARE @value NVARCHAR(MAX) = SUBSTRING(@ValueList, @startIndex, @endIndex - @startIndex)
+	DECLARE @ValueTable TABLE (Value NVARCHAR(MAX), RowNum INT) -- Thêm cột số thứ tự RowNum
+	INSERT INTO @ValueTable(Value, RowNum)
+	SELECT value, ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS RowNum
+	FROM STRING_SPLIT(@ValueList, ',')
 
-    -- Mã hóa giá trị của cột salary và allowance
-    IF @columnList LIKE '%salary%'
-    BEGIN
-        IF CHARINDEX('salary', @columnList) > 0
-        BEGIN
-            SET @value = CONVERT(NVARCHAR(MAX), EncryptByKey(Key_GUID('EmployeeSymKey'), @value))
-        END
-    END
+	DECLARE @ColumnTable TABLE (Value NVARCHAR(MAX), RowNum INT)
+	INSERT INTO @ColumnTable(Value, RowNum)
+	SELECT value, ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS RowNum
+	FROM STRING_SPLIT(@ColumnList, ',')
 
-    IF @columnList LIKE '%allowance%'
-    BEGIN
-        IF CHARINDEX('allowance', @columnList) > 0
-        BEGIN
-            SET @value = CONVERT(NVARCHAR(MAX), EncryptByKey(Key_GUID('EmployeeSymKey'), @value))
-        END
-    END
+	DECLARE @SalaryPosition INT = 0
+	DECLARE @AllowancePosition INT = 0
 
-    -- Thêm giá trị vào chuỗi truy vấn
-    SET @insertQuery = @insertQuery + '''' + @value + ''', '
+	SELECT @SalaryPosition = RowNum FROM @ColumnTable WHERE Value = 'Salary'
+	SELECT @AllowancePosition = RowNum FROM @ColumnTable WHERE Value = 'Allowance'
 
-    SET @startIndex = @endIndex + 1
-    SET @endIndex = CHARINDEX(',', @ValueList, @startIndex)
-END
+	DELETE FROM @ColumnTable WHERE Value = 'null' OR Value = 'NULL'
 
--- Loại bỏ dấu phẩy cuối cùng
-SET @insertQuery = LEFT(@insertQuery, LEN(@insertQuery) - 1)
+	-- Tạo bảng tạm thời chứa các vị trí NULL
+	DECLARE @NullPositions TABLE (Position INT)
 
--- In ra câu truy vấn
-PRINT @insertQuery
+	-- Tách chuỗi và lưu vị trí của các giá trị NULL vào bảng tạm thời
+	;WITH SplitPositions AS (
+		SELECT 
+			value, 
+			ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS Position
+		FROM 
+			STRING_SPLIT(@ColumnList, ',')
+	)
 
--- Thực thi câu lệnh INSERT
-EXEC sp_executesql @insertQuery
+	INSERT INTO @NullPositions (Position)
+	SELECT Position
+	FROM SplitPositions
+	WHERE value = 'NULL' OR value = 'null' -- Chọn các vị trí có giá trị 'NULL'
 
+	DECLARE @ValuePosition INT
 
+	DECLARE NullPositionCursor CURSOR FOR
+	SELECT Position FROM @NullPositions
 
+	OPEN NullPositionCursor
+	FETCH NEXT FROM NullPositionCursor INTO @ValuePosition
 
-    -- Thực thi câu lệnh INSERT
-    EXEC sp_executesql @insertQuery
+	DECLARE @Salary VARCHAR(20)
+	DECLARE @Allowance VARCHAR(20)
 
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+		DECLARE @Index INT = 1
 
+		-- Lặp qua từng giá trị trong bảng @ValueTable để so sánh với @ValuePosition
+		WHILE @Index <= (SELECT COUNT(*) FROM @ValueTable)
+		BEGIN
+			DECLARE @Value NVARCHAR(MAX)
+			SELECT @Value = Value FROM @ValueTable WHERE RowNum = @Index
+			IF @Index = @SalaryPosition - 1
+			BEGIN
+				SET @Salary = @Value
+				UPDATE @ValueTable SET Value = 'NULL' WHERE RowNum = @Index
+			END
+			IF @Index = @AllowancePosition - 1
+			BEGIN
+				SET @Allowance = @Value
+				UPDATE @ValueTable SET Value = 'NULL' WHERE RowNum = @Index
+			END
+			IF @Index = @ValuePosition - 1
+				DELETE @ValueTable WHERE RowNum = @Index
 
+			SET @Index = @Index + 1
+		END
 
-	DECLARE @ValueList NVARCHAR(MAX) = N'Nguyễn Cát Tường,1,20031119,0234671652,70000000,123456789,null'
-DECLARE @columnList NVARCHAR(MAX)
+		FETCH NEXT FROM NullPositionCursor INTO @ValuePosition
+	END
+	CLOSE NullPositionCursor
+	DEALLOCATE NullPositionCursor
 
--- Lấy tên các cột từ view
-SELECT @columnList = COALESCE(@columnList + ', ', '') + COLUMN_NAME
-FROM INFORMATION_SCHEMA.COLUMNS
-WHERE TABLE_NAME = 'vEmployeePersonnel'
+	SET @ColumnList = (
+		SELECT STRING_AGG(Value, ',')
+		FROM @ColumnTable
+	)
 
--- Tạo câu lệnh INSERT
-DECLARE @insertQuery NVARCHAR(MAX)
-SET @insertQuery = 'INSERT INTO Employees (' + @columnList + ') VALUES (dbo.setEmployeeID(), '
+	DECLARE @insertQuery NVARCHAR(MAX)
+	SET @insertQuery = 'INSERT INTO Employees (' + @columnList + ') VALUES (dbo.setEmployeeID(), '
 
--- Thay thế chuỗi "null" bằng NULL
---SET @ValueList = REPLACE(@ValueList, ',null,', ',NULL,')
---SET @ValueList = REPLACE(@ValueList, ',null', ',NULL')
+	SELECT @insertQuery = @insertQuery + 
+	(
+		SELECT 
+			CASE 
+				WHEN Value = 'null' THEN 'NULL,'
+				WHEN Value = 'NULL' THEN 'NULL,'
+				ELSE 'N''' + Value + ''','
+			END
+		FROM @ValueTable
+		FOR XML PATH('')
+	)
 
--- Tách các giá trị từ chuỗi @ValueList
-DECLARE @ValuesTable TABLE ([Value] NVARCHAR(MAX))
-DECLARE @Pos INT
-DECLARE @End INT
-SET @Pos = 1
-WHILE CHARINDEX(',', @ValueList, @Pos) > 0
-BEGIN
-    SET @End = CHARINDEX(',', @ValueList, @Pos)
-    INSERT INTO @ValuesTable ([Value]) VALUES (SUBSTRING(@ValueList, @Pos, @End - @Pos))
-    SET @Pos = @End + 1
-END
-INSERT INTO @ValuesTable ([Value]) VALUES (SUBSTRING(@ValueList, @Pos, LEN(@ValueList) - @Pos + 1))
+	-- Loại bỏ dấu phẩy cuối cùng nếu có
+	SET @insertQuery = LEFT(@insertQuery, LEN(@insertQuery) - 1)
 
--- Lấy giá trị từ bảng tạm và thêm vào câu lệnh INSERT
-DECLARE @EncryptedValue NVARCHAR(MAX)
-SELECT @insertQuery = @insertQuery + 
-    CASE 
-		WHEN Value = 'null' THEN 'null'
-		WHEN Value = 'NULL' THEN 'null'
-        WHEN @columnList LIKE 'Salary' AND Value = 'NULL' THEN 'NULL'
-        WHEN @columnList LIKE 'Salary' THEN CONVERT(varbinary(max), EncryptByKey(Key_GUID('EmployeeSymKey'), CONVERT(varbinary(max), CAST([Value] AS varchar(MAX)))))
-        --WHEN @columnList LIKE 'Allowance' AND Value = 'NULL' THEN 'NULL'
-        --WHEN @columnList LIKE 'Allowance' THEN CONVERT(varbinary(max), EncryptByKey(Key_GUID('EmployeeSymKey'), CONVERT(varbinary(max), CAST([Value] AS varchar(MAX)))))
-        ELSE 'N''' + Value + ''''
-    END + ','
-FROM @ValuesTable
+	-- Hoàn thành câu lệnh INSERT
+	SET @insertQuery = @insertQuery + ')'
+	-- Loại bỏ dấu phẩy cuối cùng nếu có
+	SET @insertQuery = LEFT(@insertQuery, LEN(@insertQuery) - 1)
 
--- Loại bỏ dấu phẩy cuối cùng
-SET @insertQuery = LEFT(@insertQuery, LEN(@insertQuery) - 1)
-SET @insertQuery = @insertQuery + ')'
--- In ra câu truy vấn INSERT hoàn chỉnh
-PRINT @insertQuery
-EXEC sp_executesql @insertQuery
+	-- Hoàn thành câu lệnh INSERT
+	SET @insertQuery = @insertQuery + ')'
+
+	EXEC sp_executesql @insertQuery
+
+	DECLARE @LastID VARCHAR(10)
+
+	IF @SalaryPosition > 0 AND @Salary IS NOT NULL
+	BEGIN
+		DECLARE @EncryptedSalary VARBINARY(MAX)
+
+		OPEN SYMMETRIC KEY EmployeeSymKey DECRYPTION BY PASSWORD = '123456'
+		SET @EncryptedSalary = EncryptByKey(key_guid('EmployeeSymKey'), @Salary)
+		CLOSE SYMMETRIC KEY EmployeeSymKey
+
+		SELECT @LastID = MAX(EmployeeID) FROM Employees
+
+		UPDATE Employees
+		SET Salary = @EncryptedSalary
+		WHERE EmployeeID = @LastID
+	END
+	IF @AllowancePosition> 0 AND @Allowance IS NOT NULL
+	BEGIN
+		DECLARE @EncryptedAllowance VARBINARY(MAX)
+
+		OPEN SYMMETRIC KEY EmployeeSymKey DECRYPTION BY PASSWORD = '123456'
+		SET @EncryptedAllowance = EncryptByKey(key_guid('EmployeeSymKey'), @Allowance)
+		CLOSE SYMMETRIC KEY EmployeeSymKey
+
+		SELECT @LastID = MAX(EmployeeID) FROM Employees
+
+		UPDATE Employees
+		SET Allowance = @EncryptedAllowance
+		WHERE EmployeeID = @LastID
+	END
 END
 GO
 
+-- SP them nhan vien khi co view
+CREATE OR ALTER PROC spInsertEmployee2
+	@RoleID INT,
+	@ValueList NVARCHAR(MAX)
+AS BEGIN
+	SET NOCOUNT ON
 
-EXEC spInsertEmployees 5, N'Nguyễn Cát Tường,1,20031119,0234671652,70000000,123456789,null'
---EmployeeID, FullName, Gender, DateOfBirth, PhoneNumber, TaxCode, DepartmentID
-select * from employees
--- Update bang Employees
+	EXEC spSelectEmployees @RoleID
+
+	DECLARE @ViewName VARCHAR(50)
+	SELECT @ViewName = Name FROM RolePermissions WHERE RoleID = @RoleID AND PermissionID = 2
+
+	DECLARE @CountSalary INT = 0 
+	DECLARE @CountAllowance INT = 0
+
+	SELECT @CountSalary = ORDINAL_POSITION
+	FROM INFORMATION_SCHEMA.COLUMNS
+	WHERE TABLE_NAME = @ViewName
+	AND COLUMN_NAME = 'Salary'
+	ORDER BY ORDINAL_POSITION
+
+	SELECT @CountAllowance = ORDINAL_POSITION
+	FROM INFORMATION_SCHEMA.COLUMNS
+	WHERE TABLE_NAME = @ViewName
+	AND COLUMN_NAME = 'Allowance'
+	ORDER BY ORDINAL_POSITION
+
+	DECLARE @ValuesTable TABLE (Value NVARCHAR(MAX))
+
+	DECLARE @SplitValues TABLE (Value NVARCHAR(MAX))
+	INSERT INTO @SplitValues (Value)
+	SELECT value FROM STRING_SPLIT(@ValueList, ',')
+
+	DECLARE @Counter INT = 0;
+
+	-- Duyệt qua các phần tử và thêm vào bảng @ValuesTable
+	DECLARE @Value2 NVARCHAR(MAX)
+	DECLARE value_cursor CURSOR FOR
+	SELECT Value FROM @SplitValues
+	DECLARE @Salary2 VARCHAR(20)
+	DECLARE @Allowance2 VARCHAR(20)
+	OPEN value_cursor
+	FETCH NEXT FROM value_cursor INTO @Value2
+
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+		SET @Counter = @Counter + 1
+
+		-- Nếu đạt đến phần tử thứ 6, thêm giá trị NULL vào bảng @ValuesTable
+		IF @Counter = @CountSalary - 1
+		BEGIN
+			SET @Salary2 = @Value2
+			INSERT INTO @ValuesTable (Value) VALUES ('NULL')
+		END
+		ELSE IF @Counter = @CountAllowance - 1
+		BEGIN
+			SET @Allowance2 = @Value2
+			INSERT INTO @ValuesTable (Value) VALUES ('NULL')
+		END
+		ELSE
+			INSERT INTO @ValuesTable (Value) VALUES (@Value2)
+
+		FETCH NEXT FROM value_cursor INTO @Value2
+	END
+
+	CLOSE value_cursor
+	DEALLOCATE value_cursor
+
+	DECLARE @ColumnList2 NVARCHAR(MAX)
+	-- Lấy tên các cột từ view
+	SELECT @columnList2 = COALESCE(@columnList2 + ', ', '') + COLUMN_NAME
+	FROM INFORMATION_SCHEMA.COLUMNS
+	WHERE TABLE_NAME = @ViewName
+
+	DECLARE @insertQuery2 NVARCHAR(MAX)
+	SET @insertQuery2 = 'INSERT INTO Employees (' + @columnList2 + ') VALUES (dbo.setEmployeeID(), '
+
+	SELECT @insertQuery2 = @insertQuery2 + 
+		(
+			SELECT 
+				CASE 
+					WHEN Value = 'null' THEN 'NULL,'
+					WHEN Value = 'NULL' THEN 'NULL,'
+					ELSE 'N''' + Value + ''','
+				END
+			FROM @ValuesTable
+			FOR XML PATH('')
+		)
+
+	-- Loại bỏ dấu phẩy cuối cùng nếu có
+	SET @insertQuery2 = LEFT(@insertQuery2, LEN(@insertQuery2) - 1)
+
+	-- Hoàn thành câu lệnh INSERT
+	SET @insertQuery2 = @insertQuery2 + ')'
+	-- Loại bỏ dấu phẩy cuối cùng nếu có
+	SET @insertQuery2 = LEFT(@insertQuery2, LEN(@insertQuery2) - 1)
+
+	-- Hoàn thành câu lệnh INSERT
+	SET @insertQuery2 = @insertQuery2 + ')'
+
+	EXEC sp_executesql @insertQuery2
+
+	DECLARE @LastID2 VARCHAR(10)
+
+	IF @CountSalary > 0 AND @Salary2 IS NOT NULL
+	BEGIN
+		DECLARE @EncryptedSalary2 VARBINARY(MAX)
+
+		OPEN SYMMETRIC KEY EmployeeSymKey DECRYPTION BY PASSWORD = '123456'
+		SET @EncryptedSalary2 = EncryptByKey(key_guid('EmployeeSymKey'), @Salary2)
+		CLOSE SYMMETRIC KEY EmployeeSymKey
+
+		SELECT @LastID2 = MAX(EmployeeID) FROM Employees
+
+		UPDATE Employees
+		SET Salary = @EncryptedSalary2
+		WHERE EmployeeID = @LastID2
+	END
+	IF @CountAllowance > 0 AND @Allowance2 IS NOT NULL
+	BEGIN
+		DECLARE @EncryptedAllowance2 VARBINARY(MAX)
+
+		OPEN SYMMETRIC KEY EmployeeSymKey DECRYPTION BY PASSWORD = '123456'
+		SET @EncryptedAllowance2 = EncryptByKey(key_guid('EmployeeSymKey'), @Allowance2)
+		CLOSE SYMMETRIC KEY EmployeeSymKey
+
+		SELECT @LastID2 = MAX(EmployeeID) FROM Employees
+
+		UPDATE Employees
+		SET Allowance = @EncryptedAllowance2
+		WHERE EmployeeID = @LastID2
+	END
+END
 GO
+
+-- SP them nhan vien gop
+CREATE OR ALTER PROC spInsertEmployee
+	@RoleID INT,
+	@ValueList NVARCHAR(MAX)
+AS BEGIN
+	DECLARE @ViewName VARCHAR(50)
+	SELECT @ViewName = Name FROM RolePermissions WHERE RoleID = @RoleID AND PermissionID = 2
+
+	IF @ViewName LIKE 'Employees'
+		EXEC spInsertEmployee1 @RoleID, @ValueList
+	ELSE
+		EXEC spInsertEmployee2 @RoleID, @ValueList
+END
+GO
+
+-- SP update Nhan vien
 CREATE OR ALTER PROCEDURE dbo.usp_UpdateEmployee
     @RoleID     INT,
     @ValueList  NVARCHAR(MAX),
@@ -886,7 +1025,8 @@ AS BEGIN
     DEALLOCATE UpdateCursor
 END
 GO
---delete Employeee
+
+-- SP Xoa Nhan vien
 CREATE OR ALTER PROC spDeleteEmployee
 	@RoleID INT,
 	@EmployeeID VARCHAR(10)
@@ -901,120 +1041,43 @@ AS BEGIN
 END
 GO
 
--- Cấp quyền cho Employeee
-CREATE OR ALTER PROC GrantRole
-	@RoleID INT,
-	@RoleIDAdd INT, 
-	@PermissionID INT, 
-	@Name VARCHAR(50), 
-	@ColumnName NVARCHAR(MAX)
+CREATE OR ALTER PROCEDURE spAudit 
+    @RoleID INT
 AS BEGIN
-	SET NOCOUNT ON
-
-	IF @RoleID = 1 
-	BEGIN
-		IF @Name = 'Employees'
-		BEGIN
-			IF @PermissionID = 4
-				INSERT INTO RolePermissions VALUES (@RoleIDAdd, @PermissionID, @Name, NULL)
-			ELSE
-				INSERT INTO RolePermissions VALUES (@RoleIDAdd, @PermissionID, @Name, @ColumnName)
-		END
-		ELSE
-		BEGIN
-			IF @PermissionID = 3
-				INSERT INTO RolePermissions VALUES (@RoleIDAdd, @PermissionID, @Name, @ColumnName)
-			ELSE 
-				INSERT INTO RolePermissions VALUES (@RoleIDAdd, @PermissionID, @Name, NULL)
-		END
-	END
-	ELSE
-	BEGIN
-		PRINT '0'
-		RETURN
-	END
-END
-EXEC GrantRole 1,3,1, 'Employees','EmployeeID'
-------------------
--------------------------------------------------------------------------------------
-select *from RolePermissions
-select *from Accounts
-exec spDeleteEmployee 1,EMP00024
-select *from Employees
-select *from Roles
-
-
---------------------------------------------------------------------------------------------------
--- Viết trigger chặn select, insert, update, delete bảng trực tiếp
---------------------------------------------------------------------------------------------------
-GO
-
--- Tao Role moi
-CREATE OR ALTER PROC spInsertRole
-	@RoleNamePer VARCHAR(50),
-	@RoleName VARCHAR(50)
-AS BEGIN
-	SET NOCOUNT ON
-
-    -- Kiem tra xem RoleNameInsert co quyen INSERT tren bang Roles khong
-    EXEC spCheckRolePermissions @RoleNamePer, 'INSERT', 'Roles'
-
-    -- Kiem tra xem Role co ton tai
-    IF EXISTS (SELECT 1 FROM Roles WHERE RoleName = @RoleName)
-    BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM RolePermissions
+        WHERE Name = 'vAuditLog'
+		  AND PermissionID = 1
+          AND RoleID = @RoleID
+    ) BEGIN
         RETURN
     END
 
-    -- Tao Role moi
-    INSERT INTO Roles (RoleName)
-    VALUES (@RoleName);
+    DECLARE @CreateViewStmt NVARCHAR(Max) = N'
+        CREATE VIEW vAuditLog AS
+        SELECT [LogID]
+                , [AccountID]
+                , [TableName]
+                , [PrimaryKeyValue]
+                , [ColumnName]
+                , [OldValue]
+                , [NewValue]
+                , [ActionType]
+                , [LogDate]
+        FROM [dbo].[Logs]'
+
+    EXECUTE sp_ExecuteSql @Stmt = @CreateViewStmt
 END
 GO
 
-EXEC spInsertRole 'Admin', 'GiamDoc'
-EXEC spInsertRole 'Admin', 'TPNhanSu'
-EXEC spInsertRole 'Admin', 'TruongPhong'
-EXEC spInsertRole 'Admin', 'NVNhanSu'
-EXEC spInsertRole 'Admin', 'NVTaiVu'
-EXEC spInsertRole 'Admin', 'NhanVien'
+CREATE TABLE TempTable
+(
+	AccountID INT
+)
 GO
 
--- Cap quyen cho Role moi
-CREATE OR ALTER PROC spInsertRolePermissions
-	@RoleNamePer VARCHAR(50),
-	@RoleID INT,
-	@PermissionID INT,
-	@TableName VARCHAR(50),
-	@ArrayColumnName NVARCHAR(MAX)
-AS BEGIN
-	SET NOCOUNT ON
-
-	EXEC spCheckRolePermissions @RoleNamePer, 'INSERT', 'RolePermissions'
-
-	INSERT INTO RolePermissions (RoleID, PermissionID, TableName, ArrayColumnName)
-	VALUES (@RoleID, @PermissionID, @TableName, @ArrayColumnName)
-END
-GO
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+-- Login
 CREATE OR ALTER PROC spLogin
     @USERNAME VARCHAR(50),
     @PASSWORD VARCHAR(50),
@@ -1064,6 +1127,14 @@ BEGIN
             RETURN
         END
 
+		DECLARE @AccountID INT
+		SELECT @AccountID = AccountID FROM Accounts WHERE Username = @USERNAME
+
+		IF EXISTS (SELECT 1 FROM TempTable)
+			DELETE TempTable
+		ELSE
+			INSERT INTO TempTable VALUES (@AccountID)
+
         -- Lấy các quyền từ bảng RolePermissions dựa trên RoleId và ghép các tên quyền thành một chuỗi
         SELECT @NAME = STRING_AGG(Name, ',')
         FROM RolePermissions
@@ -1075,24 +1146,45 @@ BEGIN
         SET @KETQUA = 0
     END
 END
+GO
 
+CREATE OR ALTER TRIGGER trg_Employees_Audit
+ON Employees
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+    DECLARE @AccountID INT 
+	SELECT @AccountID = AccountID FROM TempTable
 
+	-- INSERT
+    INSERT INTO Logs (AccountID, TableName, PrimaryKeyValue, ActionType, LogDate)
+    SELECT
+        @AccountID,
+        'Employees',
+        CONVERT(VARCHAR(128), I.EmployeeID),
+        'Inserted',
+        GETDATE()
+    FROM INSERTED I
 
+    -- DELETE
+    INSERT INTO Logs (AccountID, TableName, PrimaryKeyValue, ActionType, LogDate)
+    SELECT
+        @AccountID,
+        'Employees', 
+        CONVERT(VARCHAR(128), D.EmployeeID),
+        'Deleted', 
+        GETDATE() 
+    FROM DELETED D
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    -- UPDATE
+    INSERT INTO Logs (AccountID, TableName, PrimaryKeyValue, ActionType, LogDate)
+	SELECT
+		@AccountID,
+		'Employees', 
+		CONVERT(VARCHAR(128), I.EmployeeID),
+		'Updated', 
+		GETDATE() 
+	FROM INSERTED I
+	JOIN DELETED D ON I.EmployeeID = D.EmployeeID
+END
+GO
